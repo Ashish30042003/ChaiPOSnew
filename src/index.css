@@ -2,7 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Background color fix */
+body {
+  @apply bg-slate-50;
+}
+
+/* Print styles for receipts */
 @media print {
   @page { size: auto; margin: 0mm; }
-  body { background: white; }
+  body { background: white; visibility: hidden; }
+  .print-only { visibility: visible; position: absolute; left: 0; top: 0; width: 100%; }
+  .no-print { display: none !important; }
 }
+.print-only { display: none; }
