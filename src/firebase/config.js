@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore, enableIndexedDbPersistence } from "firebase/firestore";
+import { getFunctions } from "firebase/functions";
 
 // TODO: Replace these placeholder values with your actual Firebase configuration.
 const __firebase_config = JSON.stringify({
@@ -19,11 +20,12 @@ const firebaseConfig = JSON.parse(__firebase_config);
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+const functions = getFunctions(app);
 
 const rawAppId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 export const appId = rawAppId.replace(/\//g, '_');
 
-export { auth, db };
+export { auth, db, functions };
 
 // Enable offline persistence
 enableIndexedDbPersistence(db).catch((err) => {
