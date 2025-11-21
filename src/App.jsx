@@ -6,9 +6,8 @@ import {
   Palette, CheckCircle, Clock, BellRing, List
 } from 'lucide-react';
 import {
-  signInAnonymously,
   onAuthStateChanged,
-  signInWithCustomToken
+  signOut
 } from "firebase/auth";
 import {
   collection,
@@ -24,12 +23,13 @@ import {
   updateDoc
 } from "firebase/firestore";
 
-import { auth, db, appId, __initial_auth_token } from './firebase/config';
+import { auth, db, appId } from './firebase/config';
 import { ORDER_STATUS, PLANS, PLAN_ORDER, COLORS } from './constants';
 import Modal from './components/Modal';
 import Button from './components/Button';
 import LoginView from './components/LoginView';
 import Header from './components/Header';
+import Auth from './components/Auth';
 import KdsView from './views/KdsView';
 import PosView from './views/PosView';
 import SettingsModal from './modals/SettingsModal';
@@ -44,6 +44,7 @@ export default function ChaiCornerPOS() {
 
   // --- State ---
   const [user, setUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
 
   // Data State
   const [menu, setMenu] = useState([]);
@@ -83,15 +84,11 @@ export default function ChaiCornerPOS() {
 
   // --- Init ---
   useEffect(() => {
-    const init = async () => {
-      if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-        await signInWithCustomToken(auth, __initial_auth_token);
-      } else {
-        await signInAnonymously(auth);
-      }
-    };
-    init();
-    onAuthStateChanged(auth, setUser);
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setAuthLoading(false);
+    });
+    return () => unsubscribe();
   }, []);
 
   // --- Sync ---
@@ -363,6 +360,14 @@ export default function ChaiCornerPOS() {
 
   const themeColor = storeSettings.theme;
   const receiptData = salesHistory.find(s => s.id === lastOrderId) || null;
+
+  if (authLoading) {
+    return <div className="h-screen w-full flex items-center justify-center bg-stone-50 text-stone-400">Loading...</div>;
+  }
+
+  if (!user) {
+    return <Auth themeColor={storeSettings.theme} />;
+  }
 
   return (
     <div className={`min-h-screen bg-stone-100 font-sans text-stone-900 theme-${themeColor}`}>
