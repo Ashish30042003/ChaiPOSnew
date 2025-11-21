@@ -47,11 +47,11 @@ const Header = ({
 
       <div className="flex items-center gap-1 md:gap-2">
         <button onClick={() => setActiveTab('pos')} className={`p-2 rounded-full hover:bg-white/10 ${activeTab === 'pos' ? 'bg-white/20' : ''}`} title="POS"><ShoppingCart size={18} /></button>
-        
+
         {canAccess('kds') && (
           <button onClick={() => setActiveTab('kds')} className={`p-2 rounded-full hover:bg-white/10 ${activeTab === 'kds' ? 'bg-white/20' : ''}`} title="Kitchen Display"><ChefHat size={18} /></button>
         )}
-        
+
         {canAccess('customers') && (
           <button onClick={() => setActiveTab('customers')} className={`p-2 rounded-full hover:bg-white/10 ${activeTab === 'customers' ? 'bg-white/20' : ''}`} title="Customers"><Users size={18} /></button>
         )}
@@ -59,10 +59,10 @@ const Header = ({
         {canAccess('analytics') && (
           <button onClick={() => setActiveTab('analytics')} className={`p-2 rounded-full hover:bg-white/10 ${activeTab === 'analytics' ? 'bg-white/20' : ''}`} title="Analytics"><BarChart3 size={18} /></button>
         )}
-        
+
         <button onClick={() => setActiveTab('history')} className={`p-2 rounded-full hover:bg-white/10 ${activeTab === 'history' ? 'bg-white/20' : ''}`} title="History"><History size={18} /></button>
-        
-        {activeStaff.role === 'admin' && (
+
+        {activeStaff?.role === 'admin' && (
           <button onClick={() => setActiveTab('settings')} className={`p-2 rounded-full hover:bg-white/10 ${activeTab === 'settings' ? 'bg-white/20' : ''}`} title="Settings"><Settings size={18} /></button>
         )}
         <button onClick={() => { setActiveStaff(null); setCart([]); }} className="ml-2 bg-white/10 hover:bg-red-500/80 p-2 rounded-full transition-colors"><LogOut size={14} /></button>

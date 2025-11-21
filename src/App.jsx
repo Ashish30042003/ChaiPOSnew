@@ -374,6 +374,14 @@ export default function ChaiCornerPOS() {
         cartItemCount={cart.reduce((acc, item) => acc + item.qty, 0)}
         setShowMobileCart={setShowMobileCart}
         canAccess={canAccess}
+        locations={locations}
+        currentLocationId={currentLocationId}
+        setCurrentLocationId={setCurrentLocationId}
+        activeStaff={activeStaff}
+        setActiveStaff={setActiveStaff}
+        setCart={setCart}
+        analyticsData={analyticsData}
+        currentPlan={currentPlan}
       />
 
       {/* 1. Analytics Dashboard */}
