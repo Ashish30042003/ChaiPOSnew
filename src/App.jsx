@@ -40,6 +40,8 @@ import AnalyticsView from './views/AnalyticsView';
 
 // --- Main Application ---
 export default function ChaiCornerPOS() {
+  console.log("ChaiCornerPOS mounting...");
+
   // --- State ---
   const [user, setUser] = useState(null);
 
