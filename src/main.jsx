@@ -1,13 +1,36 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import LandingPage from './pages/LandingPage'
+import Auth from './components/Auth'
 import ChaiCornerPOS from './App.jsx'
+import ProtectedRoute from './components/ProtectedRoute'
 import ErrorBoundary from './components/ErrorBoundary'
 import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <ErrorBoundary>
-      <ChaiCornerPOS />
+      <BrowserRouter>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/login" element={<Auth themeColor="orange" />} />
+
+          {/* Protected Routes */}
+          <Route
+            path="/app"
+            element={
+              <ProtectedRoute>
+                <ChaiCornerPOS />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Redirect old routes */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </BrowserRouter>
     </ErrorBoundary>
   </React.StrictMode>,
 )
