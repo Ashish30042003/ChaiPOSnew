@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-    signInWithPopup,
+    signInWithRedirect,
     GoogleAuthProvider,
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword
@@ -20,11 +20,10 @@ const Auth = ({ themeColor = 'orange' }) => {
         setError('');
         try {
             const provider = new GoogleAuthProvider();
-            await signInWithPopup(auth, provider);
+            await signInWithRedirect(auth, provider);
         } catch (err) {
             console.error(err);
             setError(err.message.replace('Firebase: ', ''));
-        } finally {
             setLoading(false);
         }
     };
