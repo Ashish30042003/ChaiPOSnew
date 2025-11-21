@@ -96,6 +96,7 @@ const Auth = ({ themeColor = 'orange' }) => {
                                         onChange={(e) => setEmail(e.target.value)}
                                         className={`w-full pl-10 pr-4 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-${themeColor}-500 outline-none transition-all`}
                                         placeholder="name@example.com"
+                                        autoComplete="email"
                                     />
                                 </div>
                             </div>
@@ -112,6 +113,7 @@ const Auth = ({ themeColor = 'orange' }) => {
                                         className={`w-full pl-10 pr-4 py-3 bg-stone-50 border border-stone-200 rounded-xl focus:ring-2 focus:ring-${themeColor}-500 outline-none transition-all`}
                                         placeholder="••••••••"
                                         minLength={6}
+                                        autoComplete={isLogin ? "current-password" : "new-password"}
                                     />
                                 </div>
                             </div>
