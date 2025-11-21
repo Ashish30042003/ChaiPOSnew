@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     signInWithRedirect,
+    getRedirectResult,
     GoogleAuthProvider,
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword
@@ -14,6 +15,23 @@ const Auth = ({ themeColor = 'orange' }) => {
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+
+    // Handle redirect result from Google Sign-In
+    useEffect(() => {
+        const handleRedirectResult = async () => {
+            try {
+                const result = await getRedirectResult(auth);
+                if (result) {
+                    // User successfully signed in with Google
+                    console.log('Google sign-in successful:', result.user);
+                }
+            } catch (err) {
+                console.error('Redirect error:', err);
+                setError(err.message.replace('Firebase: ', ''));
+            }
+        };
+        handleRedirectResult();
+    }, []);
 
     const handleGoogleLogin = async () => {
         setLoading(true);

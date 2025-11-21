@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import LandingPage from './pages/LandingPage'
+import Landing from './pages/Landing'
 import Auth from './components/Auth'
 import ChaiCornerPOS from './App.jsx'
 import ProtectedRoute from './components/ProtectedRoute'
@@ -14,7 +14,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       <BrowserRouter>
         <Routes>
           {/* Public Routes */}
-          <Route path="/" element={<LandingPage />} />
+          <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Auth themeColor="orange" />} />
 
           {/* Protected Routes */}
