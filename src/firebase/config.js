@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, enableIndexedDbPersistence } from "firebase/firestore";
 
 // TODO: Replace these placeholder values with your actual Firebase configuration.
 const __firebase_config = JSON.stringify({
@@ -24,6 +24,15 @@ const rawAppId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 export const appId = rawAppId.replace(/\//g, '_');
 
 export { auth, db };
+
+// Enable offline persistence
+enableIndexedDbPersistence(db).catch((err) => {
+  if (err.code === 'failed-precondition') {
+    console.warn('Offline persistence: Multiple tabs open');
+  } else if (err.code === 'unimplemented') {
+    console.warn('Offline persistence not supported');
+  }
+});
 
 // This is a placeholder for a custom auth token, if you use one.
 export const __initial_auth_token = '';
