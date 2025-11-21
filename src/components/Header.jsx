@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  Coffee, MapPin, ShoppingCart, ChefHat, Users, History, Settings, LogOut
+  Coffee, MapPin, ShoppingCart, ChefHat, Users, History, Settings, LogOut, BarChart3
 } from 'lucide-react';
 
 const Header = ({
@@ -14,7 +14,8 @@ const Header = ({
   setActiveTab,
   activeStaff,
   setActiveStaff,
-  setCart
+  setCart,
+  analyticsData
 }) => {
   const themeColor = storeSettings.theme;
 
@@ -27,15 +28,19 @@ const Header = ({
             {storeSettings.name}
             <span className="bg-white/20 text-[10px] px-1.5 py-0.5 rounded font-medium tracking-wider uppercase">{currentPlan}</span>
           </h1>
-          <div className="flex items-center gap-2 text-xs text-white/70 mt-0.5">
-            <MapPin size={10} />
-            {canAccess('multi_location') ? (
-              <select className="bg-transparent border-none p-0 font-semibold text-white focus:ring-0 cursor-pointer text-xs" value={currentLocationId} onChange={(e) => setCurrentLocationId(e.target.value)}>
-                {locations.map(loc => <option key={loc.id} value={loc.id} className="text-black">{loc.name}</option>)}
-              </select>
-            ) : (
-              <span>{locations[0]?.name || 'Main Branch'}</span>
-            )}
+          <div className="flex items-center gap-3 text-xs text-white/70 mt-0.5">
+            <div className="flex items-center gap-1">
+              <MapPin size={10} />
+              {canAccess('multi_location') ? (
+                <select className="bg-transparent border-none p-0 font-semibold text-white focus:ring-0 cursor-pointer text-xs" value={currentLocationId} onChange={(e) => setCurrentLocationId(e.target.value)}>
+                  {locations.map(loc => <option key={loc.id} value={loc.id} className="text-black">{loc.name}</option>)}
+                </select>
+              ) : (
+                <span>{locations[0]?.name || 'Main Branch'}</span>
+              )}
+            </div>
+            <div className="h-3 w-px bg-white/20"></div>
+            <div className="font-mono font-bold text-white/90" title="Today's Collection">Today: {storeSettings.currency}{analyticsData.todaySales.toLocaleString()}</div>
           </div>
         </div>
       </div>
@@ -49,6 +54,10 @@ const Header = ({
         
         {canAccess('customers') && (
           <button onClick={() => setActiveTab('customers')} className={`p-2 rounded-full hover:bg-white/10 ${activeTab === 'customers' ? 'bg-white/20' : ''}`} title="Customers"><Users size={18} /></button>
+        )}
+
+        {canAccess('analytics') && (
+          <button onClick={() => setActiveTab('analytics')} className={`p-2 rounded-full hover:bg-white/10 ${activeTab === 'analytics' ? 'bg-white/20' : ''}`} title="Analytics"><BarChart3 size={18} /></button>
         )}
         
         <button onClick={() => setActiveTab('history')} className={`p-2 rounded-full hover:bg-white/10 ${activeTab === 'history' ? 'bg-white/20' : ''}`} title="History"><History size={18} /></button>

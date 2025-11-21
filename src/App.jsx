@@ -1,59 +1,60 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { 
-  Coffee, Plus, Minus, Trash2, Settings, History, 
-  ShoppingCart, X, Users, UserPlus, MapPin, 
+import {
+  Coffee, Plus, Minus, Trash2, Settings, History,
+  ShoppingCart, X, Users, UserPlus, MapPin,
   Lock, LogOut, Shield, ChefHat, MessageCircle, Gift,
   Palette, CheckCircle, Clock, BellRing, List
 } from 'lucide-react';
-import { 
-  signInAnonymously, 
+import {
+  signInAnonymously,
   onAuthStateChanged,
   signInWithCustomToken
 } from "firebase/auth";
-import { 
-  collection, 
-  addDoc, 
-  query, 
-  orderBy, 
-  onSnapshot, 
-  doc, 
-  setDoc, 
+import {
+  collection,
+  addDoc,
+  query,
+  orderBy,
+  onSnapshot,
+  doc,
+  setDoc,
   deleteDoc,
   limit,
   where,
   updateDoc
 } from "firebase/firestore";
 
-import { auth, db, appId, __initial_auth_token } from '../firebase/config';
-import { ORDER_STATUS, PLANS, PLAN_ORDER, COLORS } from '../constants';
-import Modal from '../components/Modal';
-import Button from '../components/Button';
-import LoginView from '../components/LoginView';
-import Header from '../components/Header';
-import KdsView from '../views/KdsView';
-import PosView from '../views/PosView';
-import SettingsModal from '../modals/SettingsModal';
-import CustomersModal from '../modals/CustomersModal';
-import HistoryModal from '../modals/HistoryModal';
-import Receipt from '../components/Receipt';
+import { auth, db, appId, __initial_auth_token } from './firebase/config';
+import { ORDER_STATUS, PLANS, PLAN_ORDER, COLORS } from './constants';
+import Modal from './components/Modal';
+import Button from './components/Button';
+import LoginView from './components/LoginView';
+import Header from './components/Header';
+import KdsView from './views/KdsView';
+import PosView from './views/PosView';
+import SettingsModal from './modals/SettingsModal';
+import CustomersModal from './modals/CustomersModal';
+import HistoryModal from './modals/HistoryModal';
+import Receipt from './components/Receipt';
+import AnalyticsView from './views/AnalyticsView';
 
 // --- Main Application ---
 export default function ChaiCornerPOS() {
   // --- State ---
   const [user, setUser] = useState(null);
-  
+
   // Data State
   const [menu, setMenu] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [salesHistory, setSalesHistory] = useState([]);
   const [locations, setLocations] = useState([{ id: 'main', name: 'Main Branch' }]);
   const [staffList, setStaffList] = useState([]);
-  
+
   // Settings / White Label / Plan
   const [storeSettings, setStoreSettings] = useState({
     name: 'Chai Corner',
     currency: '₹',
-    theme: 'orange', 
+    theme: 'orange',
     address: '123 Tea Street, Mumbai',
     plan: 'Free' // Default Plan
   });
@@ -61,18 +62,18 @@ export default function ChaiCornerPOS() {
   // Session
   const [currentLocationId, setCurrentLocationId] = useState('main');
   const [activeStaff, setActiveStaff] = useState(null);
-  
+
   // UI State
   const [cart, setCart] = useState([]);
-  const [activeTab, setActiveTab] = useState('pos'); 
+  const [activeTab, setActiveTab] = useState('pos');
   const [showMobileCart, setShowMobileCart] = useState(false);
   const [lastOrderId, setLastOrderId] = useState(null);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [pinInput, setPinInput] = useState('');
   const [redeemPoints, setRedeemPoints] = useState(0);
-  const [settingsTab, setSettingsTab] = useState('menu'); 
+  const [settingsTab, setSettingsTab] = useState('menu');
   const [editingId, setEditingId] = useState(null); // Track item being edited
-  
+
   // Forms
   const [newItem, setNewItem] = useState({ name: '', price: '', stock: '' });
   const [newCustomer, setNewCustomer] = useState({ name: '', phone: '' });
@@ -103,28 +104,28 @@ export default function ChaiCornerPOS() {
 
     const locRef = collection(db, 'artifacts', appId, 'users', user.uid, 'locations');
     onSnapshot(locRef, (snap) => {
-       if (!snap.empty) setLocations(snap.docs.map(d => ({...d.data(), id: d.id})));
-       else setDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'locations', 'main'), { name: 'Main Branch' });
+      if (!snap.empty) setLocations(snap.docs.map(d => ({ ...d.data(), id: d.id })));
+      else setDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'locations', 'main'), { name: 'Main Branch' });
     });
 
     const staffRef = collection(db, 'artifacts', appId, 'users', user.uid, 'staff');
-    onSnapshot(staffRef, (snap) => setStaffList(snap.docs.map(d => ({...d.data(), id: d.id}))));
+    onSnapshot(staffRef, (snap) => setStaffList(snap.docs.map(d => ({ ...d.data(), id: d.id }))));
 
     const custRef = collection(db, 'artifacts', appId, 'users', user.uid, 'customers');
-    onSnapshot(custRef, (snap) => setCustomers(snap.docs.map(d => ({...d.data(), id: d.id}))));
+    onSnapshot(custRef, (snap) => setCustomers(snap.docs.map(d => ({ ...d.data(), id: d.id }))));
 
     const menuRef = collection(db, 'artifacts', appId, 'users', user.uid, 'menu');
-    onSnapshot(menuRef, (snap) => setMenu(snap.docs.map(d => ({...d.data(), id: d.id}))));
+    onSnapshot(menuRef, (snap) => setMenu(snap.docs.map(d => ({ ...d.data(), id: d.id }))));
 
     const salesRef = collection(db, 'artifacts', appId, 'users', user.uid, 'sales');
     const salesQ = query(salesRef, orderBy('date', 'desc'), limit(200));
-    onSnapshot(salesQ, (snap) => setSalesHistory(snap.docs.map(d => ({...d.data(), id: d.id}))));
+    onSnapshot(salesQ, (snap) => setSalesHistory(snap.docs.map(d => ({ ...d.data(), id: d.id }))));
 
   }, [user]);
 
 
   // --- Helpers & Logic ---
-  
+
   // Feature Gating Logic
   const currentPlan = storeSettings.plan || 'Free';
   const canAccess = (feature) => {
@@ -134,15 +135,48 @@ export default function ChaiCornerPOS() {
 
   const locationMenu = menu.filter(m => m.locationId === currentLocationId || (!m.locationId && currentLocationId === 'main'));
   const activeOrders = salesHistory.filter(s => s.status !== ORDER_STATUS.SERVED && s.locationId === currentLocationId);
+  const locationSales = salesHistory.filter(s => s.locationId === currentLocationId || (!s.locationId && currentLocationId === 'main'));
+
   const cartSubtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
   const discountAmount = redeemPoints;
   const cartTotal = Math.max(0, cartSubtotal - discountAmount);
+
+  // --- Analytics Calculations ---
+  const analyticsData = useMemo(() => {
+    // 1. Daily Collection (Today's Total Sales)
+    const today = new Date().toDateString();
+    const todaySales = locationSales
+      .filter(s => new Date(s.date).toDateString() === today)
+      .reduce((sum, s) => sum + s.total, 0);
+
+    // 2. Peak Hours (Timing)
+    const hours = new Array(24).fill(0);
+    locationSales.forEach(order => {
+      const h = new Date(order.date).getHours();
+      hours[h]++;
+    });
+    const relevantHours = hours.map((count, h) => ({ label: `${h}:00`, value: count })).slice(7, 23); // 7 AM to 11 PM
+
+    // 3. Top Selling Items (Analysis)
+    const itemCounts = {};
+    locationSales.forEach(order => {
+      order.items.forEach(item => {
+        itemCounts[item.name] = (itemCounts[item.name] || 0) + item.qty;
+      });
+    });
+    const topItems = Object.entries(itemCounts)
+      .map(([name, qty]) => ({ name, qty }))
+      .sort((a, b) => b.qty - a.qty)
+      .slice(0, 5);
+
+    return { todaySales, relevantHours, topItems, totalOrders: locationSales.length };
+  }, [locationSales]);
 
   // --- Actions ---
 
   const handleLogin = (e) => {
     e.preventDefault();
-    if (pinInput === '1234') { 
+    if (pinInput === '1234') {
       setActiveStaff({ name: 'Owner', role: 'admin', id: 'owner' });
       setPinInput('');
       return;
@@ -159,26 +193,45 @@ export default function ChaiCornerPOS() {
 
   const upgradePlan = async (newPlan) => {
     if (!user) return;
-    
-    // Optimistic Update (Immediate UI Change)
-    setStoreSettings(prev => ({ ...prev, plan: newPlan }));
-    
-    if (confirm(`Confirm upgrade to ${newPlan}? 
-Your card will be charged ₹${PLANS[newPlan].price}.`)) {
-       const btn = document.getElementById('upgrade-btn-' + newPlan);
-       if(btn) btn.innerText = "Processing...";
-       
-       setTimeout(async () => {
-         // Using setDoc with merge: true fixes the issue where updateDoc failed if the doc didn't exist yet
-         await setDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'settings', 'config'), {
-           plan: newPlan
-         }, { merge: true });
-         alert(`Welcome to ${newPlan}! New features unlocked.`);
-       }, 1000);
-    } else {
-        // Revert if cancelled
-        setStoreSettings(prev => ({ ...prev, plan: currentPlan }));
-    }
+
+    const planDetails = PLANS[newPlan];
+    const amount = planDetails.price * 100; // Amount in paise
+
+    const options = {
+      key: import.meta.env.VITE_RAZORPAY_KEY_ID, // Enter the Key ID generated from the Dashboard
+      amount: amount,
+      currency: "INR",
+      name: "Chai Corner POS",
+      description: `Upgrade to ${newPlan} Plan`,
+      image: "https://cdn-icons-png.flaticon.com/512/1047/1047503.png",
+      handler: async function (response) {
+        // Payment Success
+        const btn = document.getElementById('upgrade-btn-' + newPlan);
+        if (btn) btn.innerText = "Processing...";
+
+        await setDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'settings', 'config'), {
+          plan: newPlan,
+          paymentId: response.razorpay_payment_id
+        }, { merge: true });
+
+        setStoreSettings(prev => ({ ...prev, plan: newPlan }));
+        alert(`Payment Successful! Welcome to ${newPlan}.`);
+      },
+      prefill: {
+        name: user.displayName || "Chai Owner",
+        email: user.email || "owner@chaicorner.com",
+        contact: "9999999999"
+      },
+      theme: {
+        color: "#F97316"
+      }
+    };
+
+    const rzp1 = new window.Razorpay(options);
+    rzp1.on('payment.failed', function (response) {
+      alert("Payment Failed: " + response.error.description);
+    });
+    rzp1.open();
   };
 
   const addToCart = (item) => {
@@ -233,9 +286,9 @@ Your card will be charged ₹${PLANS[newPlan].price}.`)) {
       cart.forEach(async (item) => {
         const product = menu.find(p => p.id === item.id);
         if (product) {
-           await updateDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'menu', product.id), {
-             stock: product.stock - item.qty
-           });
+          await updateDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'menu', product.id), {
+            stock: product.stock - item.qty
+          });
         }
       });
       if (selectedCustomer && canAccess('loyalty')) {
@@ -278,8 +331,8 @@ Your card will be charged ₹${PLANS[newPlan].price}.`)) {
 
   const handleSaveItem = async (e) => {
     e.preventDefault();
-    if(!newItem.name || !user) return;
-    
+    if (!newItem.name || !user) return;
+
     const productData = {
       name: newItem.name,
       price: parseFloat(newItem.price),
@@ -288,10 +341,10 @@ Your card will be charged ₹${PLANS[newPlan].price}.`)) {
     };
 
     if (editingId) {
-        await updateDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'menu', editingId), productData);
-        setEditingId(null);
+      await updateDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'menu', editingId), productData);
+      setEditingId(null);
     } else {
-        await addDoc(collection(db, 'artifacts', appId, 'users', user.uid, 'menu'), productData);
+      await addDoc(collection(db, 'artifacts', appId, 'users', user.uid, 'menu'), productData);
     }
     setNewItem({ name: '', price: '', stock: '' });
   };
@@ -306,17 +359,39 @@ Your card will be charged ₹${PLANS[newPlan].price}.`)) {
     setNewItem({ name: '', price: '', stock: '' });
   };
 
-      {/* --- Views --- */}
-      
-      {/* 1. KDS View (Gated) */}
+  const themeColor = storeSettings.theme;
+  const receiptData = salesHistory.find(s => s.id === lastOrderId) || null;
+
+  return (
+    <div className={`min-h-screen bg-stone-100 font-sans text-stone-900 theme-${themeColor}`}>
+      <Header
+        user={user}
+        storeSettings={storeSettings}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        cartItemCount={cart.reduce((acc, item) => acc + item.qty, 0)}
+        setShowMobileCart={setShowMobileCart}
+        canAccess={canAccess}
+      />
+
+      {/* 1. Analytics Dashboard */}
+      {activeTab === 'analytics' && canAccess('analytics') && (
+        <AnalyticsView
+          analyticsData={analyticsData}
+          storeSettings={storeSettings}
+          menu={menu}
+        />
+      )}
+
+      {/* 2. KDS View (Gated) */}
       {activeTab === 'kds' && canAccess('kds') && (
-        <KdsView 
+        <KdsView
           activeOrders={activeOrders}
           updateOrderStatus={updateOrderStatus}
         />
       )}
 
-      {/* 2. POS View */}
+      {/* 3. POS View */}
       {activeTab === 'pos' && (
         <PosView
           locationMenu={locationMenu}
@@ -337,6 +412,8 @@ Your card will be charged ₹${PLANS[newPlan].price}.`)) {
           handleCheckout={handleCheckout}
           canAccess={canAccess}
           menu={menu}
+          lastOrderId={lastOrderId}
+          handleReprint={handleReprint}
         />
       )}
 
@@ -403,7 +480,7 @@ Your card will be charged ₹${PLANS[newPlan].price}.`)) {
         storeSettings={storeSettings}
         locations={locations}
       />
-      
+
       <style>{`@media print { @page { margin: 0; size: auto; } body * { visibility: hidden; } .print\\:block, .print\\:block * { visibility: visible; } .print\\:block { position: absolute; left: 0; top: 0; width: 100%; } }`}</style>
     </div>
   );

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus, Minus, ShoppingCart, UserPlus, Gift, X, Users } from 'lucide-react';
+import { Plus, Minus, ShoppingCart, UserPlus, Gift, X, Users, Printer } from 'lucide-react';
 import Button from '../components/Button';
 import { getItemIcon } from '../utils/helpers';
 
@@ -21,7 +21,9 @@ const PosView = ({
   cartTotal,
   handleCheckout,
   canAccess,
-  menu
+  menu,
+  lastOrderId,
+  handleReprint
 }) => {
   const themeColor = storeSettings.theme;
 
@@ -81,7 +83,18 @@ const PosView = ({
           {/* Cart Items */}
           <div className="flex-1 overflow-y-auto p-3 space-y-2">
             {cart.length === 0 ? (
-              <div className="h-full flex flex-col items-center justify-center text-stone-300"><ShoppingCart size={48} className="mb-2 opacity-20" /><p className="text-sm">Start adding items</p></div>
+              <div className="h-full flex flex-col items-center justify-center text-stone-300">
+                <ShoppingCart size={48} className="mb-2 opacity-20" />
+                <p className="text-sm mb-4">Start adding items</p>
+                {lastOrderId && (
+                    <button 
+                      onClick={() => handleReprint(lastOrderId)}
+                      className="flex items-center gap-2 px-4 py-2 rounded-full border border-stone-300 bg-stone-50 hover:bg-stone-100 text-stone-600 text-xs font-bold transition-colors"
+                    >
+                      <Printer size={14} /> Reprint Last Order
+                    </button>
+                )}
+              </div>
             ) : (
               cart.map((item) => (
                 <div key={item.id} className="flex justify-between items-center bg-stone-50 p-2 rounded-lg border border-stone-100">

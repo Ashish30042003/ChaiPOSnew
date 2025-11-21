@@ -4,12 +4,12 @@ import { getFirestore } from "firebase/firestore";
 
 // TODO: Replace these placeholder values with your actual Firebase configuration.
 const __firebase_config = JSON.stringify({
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyBWrPuy2fFmWuKaYzaHp9VHYgNofSz6k1g",
+  authDomain: "swiftbill-wyzkx.firebaseapp.com",
+  projectId: "swiftbill-wyzkx",
+  storageBucket: "swiftbill-wyzkx.firebasestorage.app",
+  messagingSenderId: "739805008553",
+  appId: "1:739805008553:web:c7250fce45447d788b0fb8"
 });
 
 // This is a placeholder for the app ID, which you can replace.
