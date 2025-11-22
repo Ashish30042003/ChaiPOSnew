@@ -2,6 +2,8 @@ import React from 'react';
 import {
   Coffee, MapPin, ShoppingCart, ChefHat, Users, History, Settings, LogOut, BarChart3
 } from 'lucide-react';
+import { signOut } from 'firebase/auth';
+import { auth } from '../firebase/config';
 
 const Header = ({
   storeSettings,
@@ -15,7 +17,8 @@ const Header = ({
   activeStaff,
   setActiveStaff,
   setCart,
-  analyticsData
+  analyticsData,
+  setSettingsTab
 }) => {
   const themeColor = storeSettings.theme;
 
@@ -46,6 +49,18 @@ const Header = ({
       </div>
 
       <div className="flex items-center gap-1 md:gap-2">
+        {currentPlan === 'Free' && (
+          <button
+            onClick={() => {
+              setSettingsTab('subscription');
+              setActiveTab('settings');
+            }}
+            className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-3 py-1.5 rounded-full text-xs font-bold shadow-lg hover:scale-105 transition-transform animate-pulse"
+          >
+            Upgrade Now
+          </button>
+        )}
+
         <button onClick={() => setActiveTab('pos')} className={`p-2 rounded-full hover:bg-white/10 ${activeTab === 'pos' ? 'bg-white/20' : ''}`} title="POS"><ShoppingCart size={18} /></button>
 
         {canAccess('kds') && (
@@ -65,7 +80,17 @@ const Header = ({
         {activeStaff?.role === 'admin' && (
           <button onClick={() => setActiveTab('settings')} className={`p-2 rounded-full hover:bg-white/10 ${activeTab === 'settings' ? 'bg-white/20' : ''}`} title="Settings"><Settings size={18} /></button>
         )}
-        <button onClick={() => { setActiveStaff(null); setCart([]); }} className="ml-2 bg-white/10 hover:bg-red-500/80 p-2 rounded-full transition-colors"><LogOut size={14} /></button>
+        <button
+          onClick={() => {
+            if (confirm("Are you sure you want to log out?")) {
+              signOut(auth);
+            }
+          }}
+          className="ml-2 bg-white/10 hover:bg-red-500/80 p-2 rounded-full transition-colors"
+          title="Log Out"
+        >
+          <LogOut size={14} />
+        </button>
       </div>
     </header>
   );
