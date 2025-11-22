@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     signInWithPopup,
     GoogleAuthProvider,
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
-    sendPasswordResetEmail
+    sendPasswordResetEmail,
+    onAuthStateChanged
 } from 'firebase/auth';
 import { auth } from '../firebase/config';
 import { Mail, Lock, User, Coffee, ArrowRight, Loader2 } from 'lucide-react';
@@ -17,6 +19,16 @@ const Auth = ({ themeColor = 'orange' }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            if (user) {
+                navigate('/app');
+            }
+        });
+        return () => unsubscribe();
+    }, [navigate]);
 
     const handleGoogleLogin = async () => {
         setLoading(true);
@@ -25,7 +37,7 @@ const Auth = ({ themeColor = 'orange' }) => {
         try {
             const provider = new GoogleAuthProvider();
             await signInWithPopup(auth, provider);
-            // User will be automatically redirected by ProtectedRoute
+            navigate('/app');
         } catch (err) {
             console.error('Google login error:', err);
             if (err.code === 'auth/popup-closed-by-user') {
@@ -50,6 +62,7 @@ const Auth = ({ themeColor = 'orange' }) => {
             } else {
                 await createUserWithEmailAndPassword(auth, email, password);
             }
+            navigate('/app');
         } catch (err) {
             console.error(err);
             setError(err.message.replace('Firebase: ', '').replace('Error (auth/', '').replace(')', ''));
