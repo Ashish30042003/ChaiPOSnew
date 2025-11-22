@@ -311,6 +311,60 @@ export default function ChaiCornerPOS() {
     }).filter(item => item.qty > 0));
   };
 
+  const handleCheckout = async () => {
+    if (cart.length === 0) return;
+
+    const orderId = Date.now().toString();
+    const earnedPoints = canAccess('loyalty') ? Math.floor(cartTotal / 10) : 0;
+
+    const newOrder = {
+      id: orderId,
+      date: new Date().toISOString(),
+      items: [...cart],
+      subtotal: cartSubtotal,
+      discount: discountAmount,
+      total: cartTotal,
+      customerId: selectedCustomer ? selectedCustomer.id : null,
+      customerName: selectedCustomer ? selectedCustomer.name : 'Walk-in',
+      locationId: currentLocationId,
+      staffId: activeStaff?.id,
+      staffName: activeStaff?.name,
+      status: ORDER_STATUS.PENDING,
+      pointsEarned: earnedPoints,
+      pointsRedeemed: redeemPoints
+    };
+
+    if (user) {
+      await setDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'sales', orderId), newOrder);
+      cart.forEach(async (item) => {
+        const product = menu.find(p => p.id === item.id);
+        if (product) {
+          await updateDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'menu', product.id), {
+            stock: product.stock - item.qty
+          });
+        }
+      });
+      if (selectedCustomer && canAccess('loyalty')) {
+        const newPointBalance = (selectedCustomer.points || 0) - redeemPoints + earnedPoints;
+        await updateDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'customers', selectedCustomer.id), {
+          points: newPointBalance,
+          lastVisit: new Date().toISOString()
+        });
+      }
+    }
+
+    setLastOrderId(orderId);
+    setCart([]);
+    setSelectedCustomer(null);
+    setRedeemPoints(0);
+    setShowMobileCart(false);
+    setTimeout(() => window.print(), 500);
+  };
+
+  const updateOrderStatus = async (orderId, newStatus) => {
+    if (user) await updateDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'sales', orderId), { status: newStatus });
+  };
+
   const sendWhatsAppReceipt = () => {
     if (!canAccess('whatsapp')) return alert("Upgrade to Enterprise for WhatsApp Integration!");
     alert(`WhatsApp receipt sent!`);
