@@ -23,7 +23,8 @@ import {
   updateDoc
 } from "firebase/firestore";
 
-import { auth, db, appId } from './firebase/config';
+import { auth, db, appId, functions } from './firebase/config';
+import { httpsCallable } from 'firebase/functions';
 import { ORDER_STATUS, PLANS, PLAN_ORDER, COLORS } from './constants';
 import Modal from './components/Modal';
 import Button from './components/Button';
@@ -193,44 +194,97 @@ export default function ChaiCornerPOS() {
   const upgradePlan = async (newPlan) => {
     if (!user) return;
 
-    const planDetails = PLANS[newPlan];
-    const amount = planDetails.price * 100; // Amount in paise
-
-    const options = {
-      key: import.meta.env.VITE_RAZORPAY_KEY_ID, // Enter the Key ID generated from the Dashboard
-      amount: amount,
-      currency: "INR",
-      name: "Chai Corner POS",
-      description: `Upgrade to ${newPlan} Plan`,
-      image: "https://cdn-icons-png.flaticon.com/512/1047/1047503.png",
-      handler: async function (response) {
-        // Payment Success
-        const btn = document.getElementById('upgrade-btn-' + newPlan);
-        if (btn) btn.innerText = "Processing...";
-
-        await setDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'settings', 'config'), {
-          plan: newPlan,
-          paymentId: response.razorpay_payment_id
-        }, { merge: true });
-
-        setStoreSettings(prev => ({ ...prev, plan: newPlan }));
-        alert(`Payment Successful! Welcome to ${newPlan}.`);
-      },
-      prefill: {
-        name: user.displayName || "Chai Owner",
-        email: user.email || "owner@chaicorner.com",
-        contact: "9999999999"
-      },
-      theme: {
-        color: "#F97316"
+    try {
+      const btn = document.getElementById('upgrade-btn-' + newPlan);
+      if (btn) {
+        btn.innerText = "Processing...";
+        btn.disabled = true;
       }
-    };
 
-    const rzp1 = new window.Razorpay(options);
-    rzp1.on('payment.failed', function (response) {
-      alert("Payment Failed: " + response.error.description);
-    });
-    rzp1.open();
+      // 1. Create Order via Cloud Function
+      const createOrderFn = httpsCallable(functions, 'createRazorpayOrder');
+      const planDetails = PLANS[newPlan];
+
+      const orderResponse = await createOrderFn({
+        amount: planDetails.price,
+        planName: newPlan,
+        currency: storeSettings.currency === '₹' ? 'INR' : 'USD'
+      });
+
+      const { orderId, amount: orderAmount, currency: orderCurrency } = orderResponse.data;
+
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        amount: orderAmount,
+        currency: orderCurrency,
+        name: "Chai Corner POS",
+        description: `Upgrade to ${newPlan} Plan`,
+        image: "https://cdn-icons-png.flaticon.com/512/1047/1047503.png",
+        order_id: orderId,
+        handler: async function (response) {
+          try {
+            // 2. Verify Payment via Cloud Function
+            const verifyPaymentFn = httpsCallable(functions, 'verifyRazorpayPayment');
+            const verificationResponse = await verifyPaymentFn({
+              orderId: response.razorpay_order_id,
+              paymentId: response.razorpay_payment_id,
+              signature: response.razorpay_signature,
+              planName: newPlan
+            });
+
+            if (verificationResponse.data.success) {
+              setStoreSettings(prev => ({ ...prev, plan: newPlan }));
+              alert(`Payment Successful! Welcome to ${newPlan}.`);
+            } else {
+              alert("Payment verification failed. Please contact support.");
+            }
+          } catch (verifyError) {
+            console.error("Verification Error:", verifyError);
+            alert("Payment verification failed: " + verifyError.message);
+          } finally {
+            if (btn) {
+              btn.innerText = "Upgrade";
+              btn.disabled = false;
+            }
+          }
+        },
+        prefill: {
+          name: user.displayName || "Chai Owner",
+          email: user.email || "owner@chaicorner.com",
+          contact: "9999999999"
+        },
+        theme: {
+          color: "#F97316"
+        },
+        modal: {
+          ondismiss: function () {
+            if (btn) {
+              btn.innerText = "Upgrade";
+              btn.disabled = false;
+            }
+          }
+        }
+      };
+
+      const rzp1 = new window.Razorpay(options);
+      rzp1.on('payment.failed', function (response) {
+        alert("Payment Failed: " + response.error.description);
+        if (btn) {
+          btn.innerText = "Upgrade";
+          btn.disabled = false;
+        }
+      });
+      rzp1.open();
+
+    } catch (error) {
+      console.error("Order Creation Error:", error);
+      alert("Failed to initiate payment: " + error.message);
+      const btn = document.getElementById('upgrade-btn-' + newPlan);
+      if (btn) {
+        btn.innerText = "Upgrade";
+        btn.disabled = false;
+      }
+    }
   };
 
   const addToCart = (item) => {
@@ -255,60 +309,6 @@ export default function ChaiCornerPOS() {
       }
       return item;
     }).filter(item => item.qty > 0));
-  };
-
-  const handleCheckout = async () => {
-    if (cart.length === 0) return;
-
-    const orderId = Date.now().toString();
-    const earnedPoints = canAccess('loyalty') ? Math.floor(cartTotal / 10) : 0;
-
-    const newOrder = {
-      id: orderId,
-      date: new Date().toISOString(),
-      items: [...cart],
-      subtotal: cartSubtotal,
-      discount: discountAmount,
-      total: cartTotal,
-      customerId: selectedCustomer ? selectedCustomer.id : null,
-      customerName: selectedCustomer ? selectedCustomer.name : 'Walk-in',
-      locationId: currentLocationId,
-      staffId: activeStaff?.id,
-      staffName: activeStaff?.name,
-      status: ORDER_STATUS.PENDING,
-      pointsEarned: earnedPoints,
-      pointsRedeemed: redeemPoints
-    };
-
-    if (user) {
-      await setDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'sales', orderId), newOrder);
-      cart.forEach(async (item) => {
-        const product = menu.find(p => p.id === item.id);
-        if (product) {
-          await updateDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'menu', product.id), {
-            stock: product.stock - item.qty
-          });
-        }
-      });
-      if (selectedCustomer && canAccess('loyalty')) {
-        const newPointBalance = (selectedCustomer.points || 0) - redeemPoints + earnedPoints;
-        await updateDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'customers', selectedCustomer.id), {
-          points: newPointBalance,
-          lastVisit: new Date().toISOString()
-        });
-      }
-    }
-
-    setLastOrderId(orderId);
-    setCart([]);
-    setSelectedCustomer(null);
-    setRedeemPoints(0);
-    setShowMobileCart(false);
-    setTimeout(() => window.print(), 500);
-  };
-
-  const updateOrderStatus = async (orderId, newStatus) => {
-    if (user) await updateDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'sales', orderId), { status: newStatus });
   };
 
   const sendWhatsAppReceipt = () => {
