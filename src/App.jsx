@@ -89,7 +89,22 @@ export default function ChaiCornerPOS() {
       setUser(currentUser);
       setAuthLoading(false);
     });
-    return () => unsubscribe();
+
+    // Fallback: If auth doesn't trigger in 5s, stop loading (user will see login screen)
+    const timeout = setTimeout(() => {
+      setAuthLoading(prev => {
+        if (prev) {
+          console.warn("Auth state change timed out, defaulting to logged out.");
+          return false;
+        }
+        return prev;
+      });
+    }, 5000);
+
+    return () => {
+      unsubscribe();
+      clearTimeout(timeout);
+    };
   }, []);
 
   // --- Sync ---
