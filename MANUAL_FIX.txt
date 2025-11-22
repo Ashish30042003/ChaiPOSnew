@@ -1,0 +1,28 @@
+MANUAL FIX FOR App.jsx - TWO SIMPLE EDITS
+==========================================
+
+**FIX #1: Line 345** - Change from:
+  staffId: activeStaff?.id,
+
+To:
+  staffId: activeStaff?.id || null,
+
+
+**FIX #2: Line 346** - Change from:
+  staffName: activeStaff?.name,
+
+To:
+  staffName: activeStaff?.name || 'Owner',
+
+
+**FIX #3: Line 458-459** - Change from:
+  currentPlan={currentPlan}
+  />
+
+To:
+  currentPlan={currentPlan}
+  setSettingsTab={setSettingsTab}
+  />
+
+
+These 3 simple changes will fix all the console errors!
