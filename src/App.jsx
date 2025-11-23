@@ -222,11 +222,11 @@ export default function ChaiCornerPOS() {
 
       const orderResponse = await createOrderFn({
         amount: planDetails.price,
-        planName: newPlan,
+        plan: newPlan,
         currency: storeSettings.currency === '₹' ? 'INR' : 'USD'
       });
 
-      const { orderId, amount: orderAmount, currency: orderCurrency } = orderResponse.data;
+      const { id: orderId, amount: orderAmount, currency: orderCurrency } = orderResponse.data;
 
       const options = {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID,
@@ -241,13 +241,12 @@ export default function ChaiCornerPOS() {
             // 2. Verify Payment via Cloud Function
             const verifyPaymentFn = httpsCallable(functions, 'verifyRazorpayPayment');
             const verificationResponse = await verifyPaymentFn({
-              orderId: response.razorpay_order_id,
-              paymentId: response.razorpay_payment_id,
-              signature: response.razorpay_signature,
-              planName: newPlan
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              plan: newPlan
             });
 
-            if (verificationResponse.data.success) {
+            if (verificationResponse.data.status === 'success') {
               setStoreSettings(prev => ({ ...prev, plan: newPlan }));
               alert(`Payment Successful! Welcome to ${newPlan}.`);
             } else {
@@ -342,38 +341,52 @@ export default function ChaiCornerPOS() {
       customerId: selectedCustomer ? selectedCustomer.id : null,
       customerName: selectedCustomer ? selectedCustomer.name : 'Walk-in',
       locationId: currentLocationId,
-      staffId: activeStaff?.id,
-      staffName: activeStaff?.name,
+      staffId: activeStaff?.id || null,
+      staffName: activeStaff?.name || 'Owner',
       status: ORDER_STATUS.PENDING,
       pointsEarned: earnedPoints,
       pointsRedeemed: redeemPoints
     };
 
-    if (user) {
-      await setDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'sales', orderId), newOrder);
-      cart.forEach(async (item) => {
-        const product = menu.find(p => p.id === item.id);
-        if (product) {
-          await updateDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'menu', product.id), {
-            stock: product.stock - item.qty
+    try {
+      if (user) {
+        await setDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'sales', orderId), newOrder);
+
+        // Update stock
+        for (const item of cart) {
+          const product = menu.find(p => p.id === item.id);
+          if (product) {
+            await updateDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'menu', product.id), {
+              stock: product.stock - item.qty
+            });
+          }
+        }
+
+        // Update loyalty
+        if (selectedCustomer && canAccess('loyalty')) {
+          const newPointBalance = (selectedCustomer.points || 0) - redeemPoints + earnedPoints;
+          await updateDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'customers', selectedCustomer.id), {
+            points: newPointBalance,
+            lastVisit: new Date().toISOString()
           });
         }
-      });
-      if (selectedCustomer && canAccess('loyalty')) {
-        const newPointBalance = (selectedCustomer.points || 0) - redeemPoints + earnedPoints;
-        await updateDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'customers', selectedCustomer.id), {
-          points: newPointBalance,
-          lastVisit: new Date().toISOString()
-        });
       }
-    }
 
-    setLastOrderId(orderId);
-    setCart([]);
-    setSelectedCustomer(null);
-    setRedeemPoints(0);
-    setShowMobileCart(false);
-    setTimeout(() => window.print(), 500);
+      setLastOrderId(orderId);
+      setCart([]);
+      setSelectedCustomer(null);
+      setRedeemPoints(0);
+      setShowMobileCart(false);
+
+      // Delay print to ensure state updates
+      setTimeout(() => {
+        window.print();
+      }, 500);
+
+    } catch (error) {
+      console.error("Checkout Error:", error);
+      alert("Checkout failed: " + error.message);
+    }
   };
 
   const updateOrderStatus = async (orderId, newStatus) => {
@@ -439,7 +452,7 @@ export default function ChaiCornerPOS() {
   }
 
   return (
-    <div className={`min-h-screen bg-stone-100 font-sans text-stone-900 theme-${themeColor}`}>
+    <div className={`h-dvh flex flex-col bg-stone-100 font-sans text-stone-900 theme-${themeColor} overflow-hidden`}>
       <Header
         user={user}
         storeSettings={storeSettings}
@@ -456,6 +469,7 @@ export default function ChaiCornerPOS() {
         setCart={setCart}
         analyticsData={analyticsData}
         currentPlan={currentPlan}
+        setSettingsTab={setSettingsTab}
       />
 
       {/* 1. Analytics Dashboard */}
