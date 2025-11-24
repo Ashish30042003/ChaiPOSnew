@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-  Coffee, MapPin, ShoppingCart, ChefHat, Users, History, Settings, LogOut, BarChart3, LayoutDashboard, Shield, TrendingUp
+  Coffee, MapPin, ShoppingCart, ChefHat, Users, History, Settings, LogOut, BarChart3, LayoutDashboard, TrendingUp
 } from 'lucide-react';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase/config';
@@ -37,7 +37,6 @@ const Header = ({
     >
       {icon}
       <span className="hidden lg:block text-sm font-medium">{label}</span>
-      {locked && <div className="absolute -top-1 -right-1"><Shield size={10} className="text-stone-400" /></div>}
     </button>
   );
 
