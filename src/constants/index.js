@@ -15,9 +15,10 @@ export const COLORS = {
 
 export const PLANS = {
   Free: { price: 0, features: ['pos', 'receipts', 'local_stock', 'inventory'], color: 'slate' },
-  Basic: { price: 299, features: ['pos', 'receipts', 'local_stock', 'inventory', 'cloud_sync', 'customers', 'reports'], color: 'blue' },
-  Pro: { price: 999, features: ['pos', 'receipts', 'local_stock', 'inventory', 'cloud_sync', 'customers', 'reports', 'multi_location', 'staff', 'analytics'], color: 'orange' },
-  Enterprise: { price: 2999, features: ['pos', 'receipts', 'local_stock', 'inventory', 'cloud_sync', 'customers', 'reports', 'multi_location', 'staff', 'analytics', 'kds', 'loyalty', 'whatsapp', 'white_label'], color: 'purple' }
+  Test: { price: 2, features: ['pos', 'receipts', 'local_stock', 'inventory', 'cloud_sync'], color: 'green' },
+  Basic: { price: 299, features: ['pos', 'receipts', 'local_stock', 'inventory', 'cloud_sync', 'customers', 'reports', 'receipt_branding'], color: 'blue' },
+  Pro: { price: 999, features: ['pos', 'receipts', 'local_stock', 'inventory', 'cloud_sync', 'customers', 'reports', 'multi_location', 'staff', 'analytics', 'receipt_branding'], color: 'orange' },
+  Enterprise: { price: 2999, features: ['pos', 'receipts', 'local_stock', 'inventory', 'cloud_sync', 'customers', 'reports', 'multi_location', 'staff', 'analytics', 'kds', 'loyalty', 'whatsapp', 'white_label', 'receipt_branding', 'super_admin'], color: 'purple' }
 };
 
-export const PLAN_ORDER = ['Free', 'Basic', 'Pro', 'Enterprise'];
+export const PLAN_ORDER = ['Free', 'Test', 'Basic', 'Pro', 'Enterprise'];

@@ -1,0 +1,30 @@
+2025-11-23T08:58:14.567086518Z D createRazorpayOrder: Function execution started
+2025-11-23T08:58:14.574085Z D createRazorpayOrder: {"verifications":{"auth":"VALID","app":"MISSING"},"message":"Callable request verification passed"}
+2025-11-23T08:58:14.574947Z ? createRazorpayOrder: createRazorpayOrder called with: { amount: 2, currency: 'INR', plan: 'Test' }
+2025-11-23T08:58:14.575045Z ? createRazorpayOrder: Secrets check: { hasKeyId: true, hasKeySecret: true }
+2025-11-23T08:58:15.463239Z ? createRazorpayOrder: Razorpay order created successfully: order_Rj7jolnxSWujpA
+2025-11-23T08:58:15.464436201Z D createRazorpayOrder: Function execution took 897 ms, finished with status code: 200
+2025-11-23T08:58:35.821153060Z D createRazorpayOrder: Function execution started
+2025-11-23T08:58:35.824876749Z D createRazorpayOrder: Function execution took 3 ms, finished with status code: 204
+2025-11-23T08:58:36.144353846Z D createRazorpayOrder: Function execution started
+2025-11-23T08:58:36.149353Z D createRazorpayOrder: {"message":"Callable request verification passed","verifications":{"app":"MISSING","auth":"VALID"}}
+2025-11-23T08:58:36.150045Z ? createRazorpayOrder: createRazorpayOrder called with: { amount: 2, currency: 'INR', plan: 'Test' }
+2025-11-23T08:58:36.150245Z ? createRazorpayOrder: Secrets check: { hasKeyId: true, hasKeySecret: true }
+2025-11-23T08:58:36.970153Z ? createRazorpayOrder: Razorpay order created successfully: order_Rj7kCFDnbBXUIj
+2025-11-23T08:58:36.971210364Z D createRazorpayOrder: Function execution took 826 ms, finished with status code: 200
+2025-11-23T09:06:13.276886Z N createRazorpayOrder: {"@type":"type.googleapis.com/google.cloud.audit.AuditLog","authenticationInfo":{"principalEmail":"ashishbirajdar69680@gmail.com","principalSubject":"user:ashishbirajdar69680@gmail.com","oauthInfo":{"oauthClientId":"563584335869-fgrhgmd47bqnekij5i8b5pr03ho849e6.apps.googleusercontent.com"}},"requestMetadata":{"callerIp":"2409:40c2:3002:dac5:8491:8aca:1624:f64e","callerSuppliedUserAgent":"FirebaseCLI/14.25.0,gzip(gfe),gzip(gfe)","requestAttributes":{"time":"2025-11-23T09:06:13.837018Z","auth":{}},"destinationAttributes":{}},"serviceName":"cloudfunctions.googleapis.com","methodName":"google.cloud.functions.v1.CloudFunctionsService.UpdateFunction","authorizationInfo":[{"resource":"projects/swiftbill-wyzkx/locations/us-central1/functions/createRazorpayOrder","permission":"cloudfunctions.functions.update","granted":true,"resourceAttributes":{},"permissionType":"ADMIN_WRITE"}],"resourceName":"projects/swiftbill-wyzkx/locations/us-central1/functions/createRazorpayOrder","request":{"updateMask":"name,sourceUploadUrl,entryPoint,runtime,dockerRegistry,labels,httpsTrigger.securityLevel,minInstances,maxInstances,ingressSettings,environmentVariables,secretEnvironmentVariables,serviceAccountEmail,availableMemoryMb,timeout,vpcConnector,vpcConnectorEgressSettings,sourceToken,buildEnvironmentVariables","function":{"httpsTrigger":{"securityLevel":"SECURE_ALWAYS"},"secretEnvironmentVariables":[{"version":"6","key":"RAZORPAY_KEY_ID","projectId":"swiftbill-wyzkx","secret":"RAZORPAY_KEY_ID"},{"key":"RAZORPAY_KEY_SECRET","version":"5","projectId":"swiftbill-wyzkx","secret":"RAZORPAY_KEY_SECRET"}],"runtime":"nodejs20","dockerRegistry":"ARTIFACT_REGISTRY","labels":{"firebase-functions-hash":"85e216f4c6b65fd65c3d56a2b7bc1d09b5b8919e","deployment-callable":"true","deployment-tool":"cli-firebase"},"entryPoint":"createRazorpayOrder","name":"projects/swiftbill-wyzkx/locations/us-central1/functions/createRazorpayOrder","sourceUploadUrl":"https://storage.googleapis.com/uploads-583123012008.us-central1.cloudfunctions.appspot.com/d1ab89be-1f86-4297-ba49-5d3b93213e6c.zip?GoogleAccessId=service-739805008553@gcf-admin-robot.iam.gserviceaccount.com&Expires=1763890571&Signature=MVtq8Rbqu7aGApQOJv7PlyrPcCnjomDgE2G48X%2BUp3fOd1MZt1ZY3CcqmWDLQ3MYFRhvGhMQEe%2BPRGmlToWGxePMzhJjamDn0%2BJH5m03prfucKvG2zseh%2FEGSsI6yIGW6eddIqL9402OSENUdhpJ%2B6fSUApor3vyru5SSNqPl5oigkAeYUl%2B86dEyWK7ab9Ss4pd3L2DhxpbWJuvpc3HNfx6%2BMTya1vsxHMeLBlqsOxhcmoBue5n5NngtOK43vTaxSd4f874exUvUW1Nhw5K%2BCEImhrBNAxnoGifLz%2F4%2Bi6VOzqHqadsmLsrH0klmAEWypciQeZSorG6Yzb0%2FKfQGw%3D%3D"},"@type":"type.googleapis.com/google.cloud.functions.v1.UpdateFunctionRequest"},"resourceLocation":{"currentLocations":["us-central1"]}}
+2025-11-23T09:07:03.763567Z N createRazorpayOrder: {"@type":"type.googleapis.com/google.cloud.audit.AuditLog","status":{},"authenticationInfo":{},"serviceName":"cloudfunctions.googleapis.com","methodName":"google.cloud.functions.v1.CloudFunctionsService.UpdateFunction","resourceName":"projects/swiftbill-wyzkx/locations/us-central1/functions/createRazorpayOrder"}
+2025-11-23T09:09:49.196368915Z D createRazorpayOrder: Function execution started
+2025-11-23T09:09:49.272492804Z D createRazorpayOrder: Function execution took 76 ms, finished with status code: 204
+2025-11-23T09:09:49.654156732Z D createRazorpayOrder: Function execution started
+2025-11-23T09:09:50.250529Z D createRazorpayOrder: {"verifications":{"app":"MISSING","auth":"VALID"},"message":"Callable request verification passed"}
+2025-11-23T09:09:50.374169Z ? createRazorpayOrder: createRazorpayOrder called with: { amount: 2, currency: 'INR', plan: 'Test' }
+2025-11-23T09:09:50.374344Z ? createRazorpayOrder: Secrets check: { hasKeyId: true, hasKeySecret: true }
+2025-11-23T09:09:51.260599Z ? createRazorpayOrder: Razorpay order creation failed. Error details: {
+2025-11-23T09:09:51.260618Z ? createRazorpayOrder:   "statusCode": 401,
+2025-11-23T09:09:51.260623Z ? createRazorpayOrder:   "error": {
+2025-11-23T09:09:51.260627Z ? createRazorpayOrder:     "code": "BAD_REQUEST_ERROR",
+2025-11-23T09:09:51.260632Z ? createRazorpayOrder:     "description": "Authentication failed"
+2025-11-23T09:09:51.260635Z ? createRazorpayOrder:   }
+2025-11-23T09:09:51.260640Z ? createRazorpayOrder: }
+2025-11-23T09:09:51.263570626Z D createRazorpayOrder: Function execution took 1609 ms, finished with status code: 500

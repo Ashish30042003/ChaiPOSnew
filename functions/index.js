@@ -35,25 +35,32 @@ exports.createRazorpayOrder = functions
         const options = {
             amount: amount * 100, // Convert to paise
             currency: currency,
-            receipt: `receipt_${context.auth.uid}_${new Date().getTime()}`,
+            receipt: `rcpt_${new Date().getTime()}`,
             notes: {
                 firebase_uid: context.auth.uid,
                 plan: plan,
             },
         };
 
+        console.log("createRazorpayOrder called with:", { amount, currency, plan });
+        console.log("Secrets check:", {
+            hasKeyId: !!process.env.RAZORPAY_KEY_ID,
+            hasKeySecret: !!process.env.RAZORPAY_KEY_SECRET
+        });
+
         try {
             const order = await razorpay.orders.create(options);
+            console.log("Razorpay order created successfully:", order.id);
             return {
                 id: order.id,
                 amount: order.amount,
                 currency: order.currency,
             };
         } catch (error) {
-            console.error("Razorpay order creation failed:", error);
+            console.error("Razorpay order creation failed. Error details:", JSON.stringify(error, null, 2));
             throw new functions.https.HttpsError(
                 "internal",
-                "Failed to create Razorpay order."
+                "Failed to create Razorpay order: " + (error.description || error.message)
             );
         }
     });
@@ -78,6 +85,20 @@ exports.verifyRazorpayPayment = functions.https.onCall(async (data, context) => 
 
     const uid = context.auth.uid;
 
+    console.log("verifyRazorpayPayment called:", {
+        order_id: razorpay_order_id,
+        payment_id: razorpay_payment_id,
+        plan: plan,
+        uid: uid
+    });
+
+    // Validate plan exists
+    const validPlans = ['Free', 'Test', 'Basic', 'Pro', 'Enterprise'];
+    if (!validPlans.includes(plan)) {
+        console.error("Invalid plan:", plan);
+        throw new functions.https.HttpsError("invalid-argument", "Invalid plan specified.");
+    }
+
     try {
         // 2. Save payment record
         await db.collection(`artifacts/${APP_ID}/users/${uid}/payments`).add({
@@ -88,14 +109,18 @@ exports.verifyRazorpayPayment = functions.https.onCall(async (data, context) => 
             createdAt: new Date(),
         });
 
+        console.log("Payment record saved successfully");
+
         // 3. Update user plan
         const settingsRef = db.doc(`artifacts/${APP_ID}/users/${uid}/settings/config`);
         await settingsRef.set({ plan: plan }, { merge: true });
 
-        return { status: "success", plan: plan };
+        console.log("User plan updated to:", plan);
+
+        return { status: "success", plan: plan, message: `Successfully upgraded to ${plan} plan` };
 
     } catch (error) {
         console.error("Payment verification failed:", error);
-        throw new functions.https.HttpsError("internal", "Payment verification failed.");
+        throw new functions.https.HttpsError("internal", "Payment verification failed: " + error.message);
     }
 });

@@ -1,0 +1,50 @@
+2025-11-23T08:09:05.031534Z ? createRazorpayOrder: createRazorpayOrder called with: { amount: 299, currency: 'INR', plan: 'Basic' }
+2025-11-23T08:09:05.031583Z ? createRazorpayOrder: Secrets check: { hasKeyId: true, hasKeySecret: true }
+2025-11-23T08:09:05.858166Z ? createRazorpayOrder: Razorpay order creation failed. Error details: {
+2025-11-23T08:09:05.858175Z ? createRazorpayOrder:   "statusCode": 400,
+2025-11-23T08:09:05.858178Z ? createRazorpayOrder:   "error": {
+2025-11-23T08:09:05.858181Z ? createRazorpayOrder:     "code": "BAD_REQUEST_ERROR",
+2025-11-23T08:09:05.858184Z ? createRazorpayOrder:     "description": "receipt: the length must be no more than 40.",
+2025-11-23T08:09:05.858186Z ? createRazorpayOrder:     "metadata": {},
+2025-11-23T08:09:05.858189Z ? createRazorpayOrder:     "reason": "input_validation_failed",
+2025-11-23T08:09:05.858192Z ? createRazorpayOrder:     "source": "business",
+2025-11-23T08:09:05.858195Z ? createRazorpayOrder:     "step": "payment_initiation"
+2025-11-23T08:09:05.858207Z ? createRazorpayOrder:   }
+2025-11-23T08:09:05.858209Z ? createRazorpayOrder: }
+2025-11-23T08:09:05.859217476Z D createRazorpayOrder: Function execution took 834 ms, finished with status code: 500
+2025-11-23T08:09:18.378198131Z D createRazorpayOrder: Function execution started
+2025-11-23T08:09:18.381798754Z D createRazorpayOrder: Function execution took 3 ms, finished with status code: 204
+2025-11-23T08:09:18.727162360Z D createRazorpayOrder: Function execution started
+2025-11-23T08:09:18.731362Z D createRazorpayOrder: {"message":"Callable request verification passed","verifications":{"auth":"VALID","app":"MISSING"}}
+2025-11-23T08:09:18.731971Z ? createRazorpayOrder: createRazorpayOrder called with: { amount: 299, currency: 'INR', plan: 'Basic' }
+2025-11-23T08:09:18.732040Z ? createRazorpayOrder: Secrets check: { hasKeyId: true, hasKeySecret: true }
+2025-11-23T08:09:19.536598Z ? createRazorpayOrder: Razorpay order creation failed. Error details: {
+2025-11-23T08:09:19.536608Z ? createRazorpayOrder:   "statusCode": 400,
+2025-11-23T08:09:19.536611Z ? createRazorpayOrder:   "error": {
+2025-11-23T08:09:19.536614Z ? createRazorpayOrder:     "code": "BAD_REQUEST_ERROR",
+2025-11-23T08:09:19.536617Z ? createRazorpayOrder:     "description": "receipt: the length must be no more than 40.",
+2025-11-23T08:09:19.536620Z ? createRazorpayOrder:     "metadata": {},
+2025-11-23T08:09:19.536622Z ? createRazorpayOrder:     "reason": "input_validation_failed",
+2025-11-23T08:09:19.536625Z ? createRazorpayOrder:     "source": "business",
+2025-11-23T08:09:19.536627Z ? createRazorpayOrder:     "step": "payment_initiation"
+2025-11-23T08:09:19.536629Z ? createRazorpayOrder:   }
+2025-11-23T08:09:19.536631Z ? createRazorpayOrder: }
+2025-11-23T08:09:19.537646511Z D createRazorpayOrder: Function execution took 810 ms, finished with status code: 500
+2025-11-23T08:17:03.660973998Z D createRazorpayOrder: Function execution started
+2025-11-23T08:17:03.665336620Z D createRazorpayOrder: Function execution took 4 ms, finished with status code: 204
+2025-11-23T08:17:04.156816434Z D createRazorpayOrder: Function execution started
+2025-11-23T08:17:04.163093Z D createRazorpayOrder: {"message":"Callable request verification passed","verifications":{"app":"MISSING","auth":"VALID"}}
+2025-11-23T08:17:04.163626Z ? createRazorpayOrder: createRazorpayOrder called with: { amount: 299, currency: 'INR', plan: 'Basic' }
+2025-11-23T08:17:04.163695Z ? createRazorpayOrder: Secrets check: { hasKeyId: true, hasKeySecret: true }
+2025-11-23T08:17:05.041494Z ? createRazorpayOrder: Razorpay order creation failed. Error details: {
+2025-11-23T08:17:05.041503Z ? createRazorpayOrder:   "statusCode": 400,
+2025-11-23T08:17:05.041506Z ? createRazorpayOrder:   "error": {
+2025-11-23T08:17:05.041509Z ? createRazorpayOrder:     "code": "BAD_REQUEST_ERROR",
+2025-11-23T08:17:05.041511Z ? createRazorpayOrder:     "description": "receipt: the length must be no more than 40.",
+2025-11-23T08:17:05.041514Z ? createRazorpayOrder:     "metadata": {},
+2025-11-23T08:17:05.041516Z ? createRazorpayOrder:     "reason": "input_validation_failed",
+2025-11-23T08:17:05.041519Z ? createRazorpayOrder:     "source": "business",
+2025-11-23T08:17:05.041521Z ? createRazorpayOrder:     "step": "payment_initiation"
+2025-11-23T08:17:05.041524Z ? createRazorpayOrder:   }
+2025-11-23T08:17:05.041527Z ? createRazorpayOrder: }
+2025-11-23T08:17:05.042426569Z D createRazorpayOrder: Function execution took 885 ms, finished with status code: 500

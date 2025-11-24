@@ -1,0 +1,363 @@
+
+ Γ¢à∩╕Å wrangler 4.50.0
+ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+Γû▓ [WARNING] Pages now has wrangler.json support.
+
+  We detected a configuration file at E:\Ashish Web Development\Chai POS NEW\wrangler.json but it is missing the "pages_build_output_dir" field, required by Pages.
+  If you would like to use this configuration file to deploy your project, please use "pages_build_output_dir" to specify the directory of static files to upload.
+  Ignoring configuration file for now, and proceeding with project deploy.
+
+
+Γû▓ [WARNING] Warning: Your working directory is a git repo and has uncommitted changes
+
+  To silence this warning, pass in --commit-dirty=true
+
+
+X [ERROR] The constant "isCI" must be initialized
+
+    functions/node_modules/ci-info/index.d.ts:12:13:
+      12 Γöé export const isCI: boolean;
+         Γò╡              ~~~~
+
+X [ERROR] The constant "isPR" must be initialized
+
+    functions/node_modules/ci-info/index.d.ts:18:13:
+      18 Γöé export const isPR: boolean | null;
+         Γò╡              ~~~~
+
+X [ERROR] The constant "name" must be initialized
+
+    functions/node_modules/ci-info/index.d.ts:27:13:
+      27 Γöé export const name: string | null;
+         Γò╡              ~~~~
+
+X [ERROR] The constant "id" must be initialized
+
+    functions/node_modules/ci-info/index.d.ts:32:13:
+      32 Γöé export const id: string | null;
+         Γò╡              ~~
+
+X [ERROR] The constant "AGOLA" must be initialized
+
+    functions/node_modules/ci-info/index.d.ts:35:13:
+      35 Γöé export const AGOLA: boolean;
+         Γò╡              ~~~~~
+
+X [ERROR] The constant "APPCIRCLE" must be initialized
+
+    functions/node_modules/ci-info/index.d.ts:36:13:
+      36 Γöé export const APPCIRCLE: boolean;
+         Γò╡              ~~~~~~~~~
+
+X [ERROR] The constant "APPVEYOR" must be initialized
+
+    functions/node_modules/ci-info/index.d.ts:37:13:
+      37 Γöé export const APPVEYOR: boolean;
+         Γò╡              ~~~~~~~~
+
+X [ERROR] The constant "CODEBUILD" must be initialized
+
+    functions/node_modules/ci-info/index.d.ts:38:13:
+      38 Γöé export const CODEBUILD: boolean;
+         Γò╡              ~~~~~~~~~
+
+X [ERROR] The constant "AZURE_PIPELINES" must be initialized
+
+    functions/node_modules/ci-info/index.d.ts:39:13:
+      39 Γöé export const AZURE_PIPELINES: boolean;
+         Γò╡              ~~~~~~~~~~~~~~~
+
+X [ERROR] The constant "BAMBOO" must be initialized
+
+    functions/node_modules/ci-info/index.d.ts:40:13:
+      40 Γöé export const BAMBOO: boolean;
+         Γò╡              ~~~~~~
+
+X [ERROR] The constant "BITBUCKET" must be initialized
+
+    functions/node_modules/ci-info/index.d.ts:41:13:
+      41 Γöé export const BITBUCKET: boolean;
+         Γò╡              ~~~~~~~~~
+
+X [ERROR] The constant "BITRISE" must be initialized
+
+    functions/node_modules/ci-info/index.d.ts:42:13:
+      42 Γöé export const BITRISE: boolean;
+         Γò╡              ~~~~~~~
+
+X [ERROR] The constant "BUDDY" must be initialized
+
+    functions/node_modules/ci-info/index.d.ts:43:13:
+      43 Γöé export const BUDDY: boolean;
+         Γò╡              ~~~~~
+
+X [ERROR] The constant "BUILDKITE" must be initialized
+
+    functions/node_modules/ci-info/index.d.ts:44:13:
+      44 Γöé export const BUILDKITE: boolean;
+         Γò╡              ~~~~~~~~~
+
+X [ERROR] The constant "CIRCLE" must be initialized
+
+    functions/node_modules/ci-info/index.d.ts:45:13:
+      45 Γöé export const CIRCLE: boolean;
+         Γò╡              ~~~~~~
+
+X [ERROR] The constant "CIRRUS" must be initialized
+
+    functions/node_modules/ci-info/index.d.ts:46:13:
+      46 Γöé export const CIRRUS: boolean;
+         Γò╡              ~~~~~~
+
+X [ERROR] The constant "CLOUDFLARE_PAGES" must be initialized
+
+    functions/node_modules/ci-info/index.d.ts:47:13:
+      47 Γöé export const CLOUDFLARE_PAGES: boolean;
+         Γò╡              ~~~~~~~~~~~~~~~~
+
+X [ERROR] The constant "CLOUDFLARE_WORKERS" must be initialized
+
+    functions/node_modules/ci-info/index.d.ts:48:13:
+      48 Γöé export const CLOUDFLARE_WORKERS: boolean;
+         Γò╡              ~~~~~~~~~~~~~~~~~~
+
+X [ERROR] The constant "CODEFRESH" must be initialized
+
+    functions/node_modules/ci-info/index.d.ts:49:13:
+      49 Γöé export const CODEFRESH: boolean;
+         Γò╡              ~~~~~~~~~
+
+X [ERROR] The constant "CODEMAGIC" must be initialized
+
+    functions/node_modules/ci-info/index.d.ts:50:13:
+      50 Γöé export const CODEMAGIC: boolean;
+         Γò╡              ~~~~~~~~~
+
+X [ERROR] The constant "CODESHIP" must be initialized
+
+    functions/node_modules/ci-info/index.d.ts:51:13:
+      51 Γöé export const CODESHIP: boolean;
+         Γò╡              ~~~~~~~~
+
+X [ERROR] The constant "DRONE" must be initialized
+
+    functions/node_modules/ci-info/index.d.ts:52:13:
+      52 Γöé export const DRONE: boolean;
+         Γò╡              ~~~~~
+
+X [ERROR] The constant "DSARI" must be initialized
+
+    functions/node_modules/ci-info/index.d.ts:53:13:
+      53 Γöé export const DSARI: boolean;
+         Γò╡              ~~~~~
+
+X [ERROR] The constant "EARTHLY" must be initialized
+
+    functions/node_modules/ci-info/index.d.ts:54:13:
+      54 Γöé export const EARTHLY: boolean;
+         Γò╡              ~~~~~~~
+
+X [ERROR] The constant "EAS" must be initialized
+
+    functions/node_modules/ci-info/index.d.ts:55:13:
+      55 Γöé export const EAS: boolean;
+         Γò╡              ~~~
+
+X [ERROR] The constant "GERRIT" must be initialized
+
+    functions/node_modules/ci-info/index.d.ts:56:13:
+      56 Γöé export const GERRIT: boolean;
+         Γò╡              ~~~~~~
+
+X [ERROR] The constant "GITEA_ACTIONS" must be initialized
+
+    functions/node_modules/ci-info/index.d.ts:57:13:
+      57 Γöé export const GITEA_ACTIONS: boolean;
+         Γò╡              ~~~~~~~~~~~~~
+
+X [ERROR] The constant "GITHUB_ACTIONS" must be initialized
+
+    functions/node_modules/ci-info/index.d.ts:58:13:
+      58 Γöé export const GITHUB_ACTIONS: boolean;
+         Γò╡              ~~~~~~~~~~~~~~
+
+X [ERROR] The constant "GITLAB" must be initialized
+
+    functions/node_modules/ci-info/index.d.ts:59:13:
+      59 Γöé export const GITLAB: boolean;
+         Γò╡              ~~~~~~
+
+X [ERROR] The constant "GOCD" must be initialized
+
+    functions/node_modules/ci-info/index.d.ts:60:13:
+      60 Γöé export const GOCD: boolean;
+         Γò╡              ~~~~
+
+X [ERROR] The constant "GOOGLE_CLOUD_BUILD" must be initialized
+
+    functions/node_modules/ci-info/index.d.ts:61:13:
+      61 Γöé export const GOOGLE_CLOUD_BUILD: boolean;
+         Γò╡              ~~~~~~~~~~~~~~~~~~
+
+X [ERROR] The constant "HARNESS" must be initialized
+
+    functions/node_modules/ci-info/index.d.ts:62:13:
+      62 Γöé export const HARNESS: boolean;
+         Γò╡              ~~~~~~~
+
+X [ERROR] The constant "HEROKU" must be initialized
+
+    functions/node_modules/ci-info/index.d.ts:63:13:
+      63 Γöé export const HEROKU: boolean;
+         Γò╡              ~~~~~~
+
+X [ERROR] The constant "HUDSON" must be initialized
+
+    functions/node_modules/ci-info/index.d.ts:64:13:
+      64 Γöé export const HUDSON: boolean;
+         Γò╡              ~~~~~~
+
+X [ERROR] The constant "JENKINS" must be initialized
+
+    functions/node_modules/ci-info/index.d.ts:65:13:
+      65 Γöé export const JENKINS: boolean;
+         Γò╡              ~~~~~~~
+
+X [ERROR] The constant "LAYERCI" must be initialized
+
+    functions/node_modules/ci-info/index.d.ts:66:13:
+      66 Γöé export const LAYERCI: boolean;
+         Γò╡              ~~~~~~~
+
+X [ERROR] The constant "MAGNUM" must be initialized
+
+    functions/node_modules/ci-info/index.d.ts:67:13:
+      67 Γöé export const MAGNUM: boolean;
+         Γò╡              ~~~~~~
+
+X [ERROR] The constant "NETLIFY" must be initialized
+
+    functions/node_modules/ci-info/index.d.ts:68:13:
+      68 Γöé export const NETLIFY: boolean;
+         Γò╡              ~~~~~~~
+
+X [ERROR] The constant "NEVERCODE" must be initialized
+
+    functions/node_modules/ci-info/index.d.ts:69:13:
+      69 Γöé export const NEVERCODE: boolean;
+         Γò╡              ~~~~~~~~~
+
+X [ERROR] The constant "PROW" must be initialized
+
+    functions/node_modules/ci-info/index.d.ts:70:13:
+      70 Γöé export const PROW: boolean;
+         Γò╡              ~~~~
+
+X [ERROR] The constant "RELEASEHUB" must be initialized
+
+    functions/node_modules/ci-info/index.d.ts:71:13:
+      71 Γöé export const RELEASEHUB: boolean;
+         Γò╡              ~~~~~~~~~~
+
+X [ERROR] The constant "RENDER" must be initialized
+
+    functions/node_modules/ci-info/index.d.ts:72:13:
+      72 Γöé export const RENDER: boolean;
+         Γò╡              ~~~~~~
+
+X [ERROR] The constant "SAIL" must be initialized
+
+    functions/node_modules/ci-info/index.d.ts:73:13:
+      73 Γöé export const SAIL: boolean;
+         Γò╡              ~~~~
+
+X [ERROR] The constant "SCREWDRIVER" must be initialized
+
+    functions/node_modules/ci-info/index.d.ts:74:13:
+      74 Γöé export const SCREWDRIVER: boolean;
+         Γò╡              ~~~~~~~~~~~
+
+X [ERROR] The constant "SEMAPHORE" must be initialized
+
+    functions/node_modules/ci-info/index.d.ts:75:13:
+      75 Γöé export const SEMAPHORE: boolean;
+         Γò╡              ~~~~~~~~~
+
+X [ERROR] The constant "SOURCEHUT" must be initialized
+
+    functions/node_modules/ci-info/index.d.ts:76:13:
+      76 Γöé export const SOURCEHUT: boolean;
+         Γò╡              ~~~~~~~~~
+
+X [ERROR] The constant "STRIDER" must be initialized
+
+    functions/node_modules/ci-info/index.d.ts:77:13:
+      77 Γöé export const STRIDER: boolean;
+         Γò╡              ~~~~~~~
+
+X [ERROR] The constant "TASKCLUSTER" must be initialized
+
+    functions/node_modules/ci-info/index.d.ts:78:13:
+      78 Γöé export const TASKCLUSTER: boolean;
+         Γò╡              ~~~~~~~~~~~
+
+X [ERROR] The constant "TEAMCITY" must be initialized
+
+    functions/node_modules/ci-info/index.d.ts:79:13:
+      79 Γöé export const TEAMCITY: boolean;
+         Γò╡              ~~~~~~~~
+
+X [ERROR] The constant "TRAVIS" must be initialized
+
+    functions/node_modules/ci-info/index.d.ts:80:13:
+      80 Γöé export const TRAVIS: boolean;
+         Γò╡              ~~~~~~
+
+X [ERROR] The constant "VELA" must be initialized
+
+    functions/node_modules/ci-info/index.d.ts:81:13:
+      81 Γöé export const VELA: boolean;
+         Γò╡              ~~~~
+
+X [ERROR] The constant "VERCEL" must be initialized
+
+    functions/node_modules/ci-info/index.d.ts:82:13:
+      82 Γöé export const VERCEL: boolean;
+         Γò╡              ~~~~~~
+
+X [ERROR] The constant "APPCENTER" must be initialized
+
+    functions/node_modules/ci-info/index.d.ts:83:13:
+      83 Γöé export const APPCENTER: boolean;
+         Γò╡              ~~~~~~~~~
+
+X [ERROR] The constant "WOODPECKER" must be initialized
+
+    functions/node_modules/ci-info/index.d.ts:84:13:
+      84 Γöé export const WOODPECKER: boolean;
+         Γò╡              ~~~~~~~~~~
+
+X [ERROR] The constant "XCODE_CLOUD" must be initialized
+
+    functions/node_modules/ci-info/index.d.ts:85:13:
+      85 Γöé export const XCODE_CLOUD: boolean;
+         Γò╡              ~~~~~~~~~~~
+
+X [ERROR] The constant "XCODE_SERVER" must be initialized
+
+    functions/node_modules/ci-info/index.d.ts:86:13:
+      86 Γöé export const XCODE_SERVER: boolean;
+         Γò╡              ~~~~~~~~~~~~
+
+
+X [ERROR] Build failed with 56 errors:
+
+  functions/node_modules/ci-info/index.d.ts:12:13: ERROR: The constant "isCI" must be initialized
+  functions/node_modules/ci-info/index.d.ts:18:13: ERROR: The constant "isPR" must be initialized
+  functions/node_modules/ci-info/index.d.ts:27:13: ERROR: The constant "name" must be initialized
+  functions/node_modules/ci-info/index.d.ts:32:13: ERROR: The constant "id" must be initialized
+  functions/node_modules/ci-info/index.d.ts:35:13: ERROR: The constant "AGOLA" must be initialized
+  ...
+
+
+≡ƒ¬╡  Logs were written to "C:\Users\ashis\AppData\Roaming\xdg.config\.wrangler\logs\wrangler-2025-11-23_06-10-36_476.log"

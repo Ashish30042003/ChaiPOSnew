@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Palette, Shield, List, Trash2, CheckCircle, Edit2, RotateCcw } from 'lucide-react';
 import Modal from '../components/Modal';
 import Button from '../components/Button';
@@ -29,11 +29,14 @@ const SettingsModal = ({
   startEdit,
   cancelEdit
 }) => {
+  const [expandedPlan, setExpandedPlan] = useState(null);
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Settings" color={themeColor}>
       <div className="flex border-b border-stone-200 mb-4 overflow-x-auto">
         <button onClick={() => setSettingsTab('menu')} className={`flex-1 py-2 text-sm font-bold border-b-2 whitespace-nowrap ${settingsTab === 'menu' ? `border-${themeColor}-600 text-${themeColor}-600` : 'border-transparent text-stone-400'}`}>Menu</button>
         <button onClick={() => setSettingsTab('general')} className={`flex-1 py-2 text-sm font-bold border-b-2 whitespace-nowrap ${settingsTab === 'general' ? `border-${themeColor}-600 text-${themeColor}-600` : 'border-transparent text-stone-400'}`}>General</button>
+        {canAccess('receipt_branding') && <button onClick={() => setSettingsTab('receipt')} className={`flex-1 py-2 text-sm font-bold border-b-2 whitespace-nowrap ${settingsTab === 'receipt' ? `border-${themeColor}-600 text-${themeColor}-600` : 'border-transparent text-stone-400'}`}>Receipt</button>}
         <button onClick={() => setSettingsTab('subscription')} className={`flex-1 py-2 text-sm font-bold border-b-2 whitespace-nowrap ${settingsTab === 'subscription' ? `border-${themeColor}-600 text-${themeColor}-600` : 'border-transparent text-stone-400'}`}>Subscription</button>
       </div>
 
@@ -97,6 +100,70 @@ const SettingsModal = ({
         </div>
       )}
 
+      {settingsTab === 'receipt' && canAccess('receipt_branding') && (
+        <div className="space-y-4">
+          <h3 className="font-bold text-stone-800">Receipt Branding</h3>
+          <div className="space-y-3">
+            <div>
+              <label className="block text-xs font-bold text-stone-500 uppercase mb-1">Store Logo</label>
+              <div className="flex flex-col gap-2">
+                {storeSettings.logo && (
+                  <div className="relative w-fit">
+                    <img src={storeSettings.logo} alt="Logo Preview" className="h-16 object-contain border rounded p-1" />
+                    <button
+                      onClick={() => setStoreSettings({ ...storeSettings, logo: '' })}
+                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5 hover:bg-red-600"
+                    >
+                      <Trash2 size={12} />
+                    </button>
+                  </div>
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                      if (file.size > 500000) { // 500KB limit
+                        alert("File is too large. Please upload an image under 500KB.");
+                        return;
+                      }
+                      const reader = new FileReader();
+                      reader.onloadend = () => {
+                        setStoreSettings({ ...storeSettings, logo: reader.result });
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                  className="w-full text-sm text-stone-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-stone-100 file:text-stone-700 hover:file:bg-stone-200"
+                />
+              </div>
+              <p className="text-xs text-stone-400 mt-1">Upload an image (max 500KB). It will appear on receipts and as a watermark.</p>
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-stone-500 uppercase mb-1">Address</label>
+              <textarea
+                className="w-full border rounded px-3 py-2 text-sm"
+                rows="2"
+                placeholder="123 Main Street, City"
+                value={storeSettings.address || ''}
+                onChange={e => setStoreSettings({ ...storeSettings, address: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-stone-500 uppercase mb-1">Phone Number</label>
+              <input
+                className="w-full border rounded px-3 py-2 text-sm"
+                placeholder="+91 98765 43210"
+                value={storeSettings.phone || ''}
+                onChange={e => setStoreSettings({ ...storeSettings, phone: e.target.value })}
+              />
+            </div>
+            <Button themeColor={themeColor} onClick={saveSettings} className="w-full">Save Receipt Settings</Button>
+          </div>
+        </div>
+      )}
+
       {settingsTab === 'subscription' && (
         <div className="space-y-4">
           <div className="text-center mb-4">
@@ -108,6 +175,7 @@ const SettingsModal = ({
               const plan = PLANS[planName];
               const isCurrent = currentPlan === planName;
               const isUpgrade = PLAN_ORDER.indexOf(planName) > PLAN_ORDER.indexOf(currentPlan);
+              const isExpanded = expandedPlan === planName;
 
               return (
                 <div key={planName} className={`border rounded-xl p-3 ${isCurrent ? `border-${plan.color}-500 bg-${plan.color}-50 ring-1 ring-${plan.color}-500` : 'border-stone-200 bg-white'}`}>
@@ -118,8 +186,28 @@ const SettingsModal = ({
                     </div>
                     <div className="font-bold text-stone-800">₹{plan.price}<span className="text-xs font-normal text-stone-400">/mo</span></div>
                   </div>
+
+                  {isExpanded && (
+                    <div className="mt-2 mb-2 p-2 bg-white/50 rounded-lg">
+                      <div className="text-xs font-bold mb-1">Features:</div>
+                      <ul className="text-xs space-y-1">
+                        {plan.features.map((feature, idx) => (
+                          <li key={idx} className="flex items-center gap-1">
+                            <CheckCircle size={12} className="text-green-600" />
+                            <span>{feature.replace(/_/g, ' ').toUpperCase()}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
                   <div className="flex justify-between items-center mt-3">
-                    <button className="text-xs text-stone-400 underline">View Details</button>
+                    <button
+                      onClick={() => setExpandedPlan(isExpanded ? null : planName)}
+                      className="text-xs text-stone-400 underline hover:text-stone-600"
+                    >
+                      {isExpanded ? 'Hide Details' : 'View Details'}
+                    </button>
                     {isCurrent ? (
                       <span className="text-xs font-bold text-green-600 flex items-center gap-1"><CheckCircle size={12} /> Active</span>
                     ) : (

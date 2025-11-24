@@ -38,6 +38,7 @@ import CustomersModal from './modals/CustomersModal';
 import HistoryModal from './modals/HistoryModal';
 import Receipt from './components/Receipt';
 import AnalyticsView from './views/AnalyticsView';
+import DashboardView from './views/DashboardView';
 
 // --- Main Application ---
 export default function ChaiCornerPOS() {
@@ -471,6 +472,20 @@ export default function ChaiCornerPOS() {
         currentPlan={currentPlan}
         setSettingsTab={setSettingsTab}
       />
+
+      {/* Dashboard View */}
+      {activeTab === 'dashboard' && (
+        <DashboardView
+          storeSettings={storeSettings}
+          salesHistory={salesHistory}
+          menu={menu}
+          activeOrders={activeOrders}
+          currentPlan={currentPlan}
+          setActiveTab={setActiveTab}
+          setSettingsTab={setSettingsTab}
+          themeColor={themeColor}
+        />
+      )}
 
       {/* 1. Analytics Dashboard */}
       {activeTab === 'analytics' && canAccess('analytics') && (

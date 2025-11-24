@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  Coffee, MapPin, ShoppingCart, ChefHat, Users, History, Settings, LogOut, BarChart3
+  Coffee, MapPin, ShoppingCart, ChefHat, Users, History, Settings, LogOut, BarChart3, LayoutDashboard, LayoutGrid
 } from 'lucide-react';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase/config';
@@ -61,6 +61,7 @@ const Header = ({
           </button>
         )}
 
+        <button onClick={() => setActiveTab('dashboard')} className={`p-2 rounded-full hover:bg-white/10 ${activeTab === 'dashboard' ? 'bg-white/20' : ''}`} title="Dashboard"><LayoutDashboard size={18} /></button>
         <button onClick={() => setActiveTab('pos')} className={`p-2 rounded-full hover:bg-white/10 ${activeTab === 'pos' ? 'bg-white/20' : ''}`} title="POS"><ShoppingCart size={18} /></button>
 
         {canAccess('kds') && (
