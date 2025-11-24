@@ -39,8 +39,6 @@ import HistoryModal from './modals/HistoryModal';
 import Receipt from './components/Receipt';
 import AnalyticsView from './views/AnalyticsView';
 import DashboardView from './views/DashboardView';
-import SuperAdminView from './views/SuperAdminView';
-import { isSuperAdmin } from './utils/superAdmin';
 
 // --- Main Application ---
 export default function ChaiCornerPOS() {
@@ -489,8 +487,6 @@ export default function ChaiCornerPOS() {
 
 
       {/* Super Admin View */}
-      {activeTab === 'superadmin' && isSuperAdmin(user) && (
-        <SuperAdminView user={user} />
       )}
 
       {/* Dashboard View */}

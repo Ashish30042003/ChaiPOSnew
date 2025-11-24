@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Landing from './pages/Landing'
 import Auth from './components/Auth'
 import ChaiCornerPOS from './App.jsx'
+import AdminApp from './AdminApp.jsx'
 import ProtectedRoute from './components/ProtectedRoute'
 import ErrorBoundary from './components/ErrorBoundary'
 import './index.css'
@@ -17,7 +18,10 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Auth themeColor="orange" />} />
 
-          {/* Protected Routes */}
+          {/* Admin Portal Routes */}
+          <Route path="/admin/*" element={<AdminApp />} />
+
+          {/* Protected POS Routes */}
           <Route
             path="/app"
             element={

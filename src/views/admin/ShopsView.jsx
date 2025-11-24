@@ -4,9 +4,9 @@ import {
     Search, Filter, Download, Shield
 } from 'lucide-react';
 import { collection, getDocs } from 'firebase/firestore';
-import { db, appId } from '../firebase/config';
+import { db, appId } from '../../firebase/config';
 
-export default function SuperAdminView({ user }) {
+export default function ShopsView({ user }) {
     const [shops, setShops] = useState([]);
     const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState({
