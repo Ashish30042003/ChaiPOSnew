@@ -494,10 +494,6 @@ export default function ChaiCornerPOS() {
         setSettingsTab={setSettingsTab}
       />
 
-
-      {/* Super Admin View */}
-      )}
-
       {/* Dashboard View */}
       {activeTab === 'dashboard' && (
         <DashboardView
