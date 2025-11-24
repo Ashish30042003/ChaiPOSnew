@@ -68,7 +68,7 @@ const Header = ({
       </div>
 
       {/* Center: Navigation */}
-      <div className="flex items-center gap-1 md:gap-2">
+      <div className="flex items-center gap-1 md:gap-2 overflow-x-auto no-scrollbar max-w-[60%] md:max-w-none justify-end">
         {/* Upgrade Button for Free Plan */}
         {currentPlan === 'Free' && (
           <button
