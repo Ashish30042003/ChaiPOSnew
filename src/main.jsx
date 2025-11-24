@@ -2,6 +2,10 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Landing from './pages/Landing'
+import FeaturesPage from './pages/FeaturesPage'
+import PricingPage from './pages/PricingPage'
+import AboutPage from './pages/AboutPage'
+import ContactPage from './pages/ContactPage'
 import Auth from './components/Auth'
 import ChaiCornerPOS from './App.jsx'
 import AdminApp from './AdminApp.jsx'
@@ -14,8 +18,14 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <ErrorBoundary>
       <BrowserRouter>
         <Routes>
-          {/* Public Routes */}
+          {/* Public Landing Pages */}
           <Route path="/" element={<Landing />} />
+          <Route path="/features" element={<FeaturesPage />} />
+          <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/contact" element={<ContactPage />} />
+
+          {/* Auth */}
           <Route path="/login" element={<Auth themeColor="orange" />} />
 
           {/* Admin Portal Routes */}
