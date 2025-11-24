@@ -229,8 +229,18 @@ export default function ChaiCornerPOS() {
 
       const { id: orderId, amount: orderAmount, currency: orderCurrency } = orderResponse.data;
 
+      const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID;
+      if (!razorpayKey) {
+        alert("Razorpay Key is missing! Please set VITE_RAZORPAY_KEY_ID in your .env file and restart the server.");
+        if (btn) {
+          btn.innerText = "Upgrade";
+          btn.disabled = false;
+        }
+        return;
+      }
+
       const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        key: razorpayKey,
         amount: orderAmount,
         currency: orderCurrency,
         name: "Chai Corner POS",
@@ -248,7 +258,9 @@ export default function ChaiCornerPOS() {
             });
 
             if (verificationResponse.data.status === 'success') {
-              setStoreSettings(prev => ({ ...prev, plan: newPlan }));
+              const newSettings = { ...storeSettings, plan: newPlan };
+              setStoreSettings(newSettings);
+              await setDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'settings', 'config'), { plan: newPlan }, { merge: true });
               alert(`Payment Successful! Welcome to ${newPlan}.`);
             } else {
               alert("Payment verification failed. Please contact support.");
