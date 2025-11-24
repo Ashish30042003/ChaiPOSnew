@@ -22,8 +22,11 @@ export default function AdminDashboard() {
     const fetchStats = async () => {
         try {
             setLoading(true);
+            console.log('Fetching shops from:', 'artifacts', appId, 'users');
             const usersRef = collection(db, 'artifacts', appId, 'users');
             const snapshot = await getDocs(usersRef);
+
+            console.log('Found users:', snapshot.size);
 
             const newStats = {
                 totalShops: 0,
@@ -33,23 +36,31 @@ export default function AdminDashboard() {
             };
 
             for (const doc of snapshot.docs) {
+                console.log('Processing user:', doc.id);
                 const settingsSnap = await getDocs(collection(db, 'artifacts', appId, 'users', doc.id, 'settings'));
                 let config = { plan: 'Free' };
 
                 settingsSnap.forEach(s => {
-                    if (s.id === 'config') config = s.data();
+                    if (s.id === 'config') {
+                        config = s.data();
+                        console.log('Found config for', doc.id, ':', config);
+                    }
                 });
 
                 newStats.totalShops++;
                 if (config.plan !== 'Free') newStats.activeShops++;
                 if (newStats.planDistribution[config.plan] !== undefined) {
                     newStats.planDistribution[config.plan]++;
+                } else {
+                    console.warn('Unknown plan:', config.plan);
                 }
             }
 
+            console.log('Final stats:', newStats);
             setStats(newStats);
         } catch (error) {
             console.error("Error fetching stats:", error);
+            alert("Failed to load shop data: " + error.message);
         } finally {
             setLoading(false);
         }

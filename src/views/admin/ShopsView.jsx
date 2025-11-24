@@ -23,10 +23,12 @@ export default function ShopsView({ user }) {
     const fetchShops = async () => {
         try {
             setLoading(true);
-            // Fetch all users (shops)
-            // Note: In a real production app with thousands of users, you'd want pagination here.
+            console.log('ShopsView: Fetching from path:', 'artifacts', appId, 'users');
+
             const usersRef = collection(db, 'artifacts', appId, 'users');
             const snapshot = await getDocs(usersRef);
+
+            console.log('ShopsView: Found', snapshot.size, 'users');
 
             const shopList = [];
             const newStats = {
@@ -37,20 +39,21 @@ export default function ShopsView({ user }) {
             };
 
             for (const doc of snapshot.docs) {
-                // We need to fetch the settings subcollection for each user to get the plan and shop name
-                // This is N+1 queries, which is not ideal for scale but fine for an MVP admin panel.
-                // A better approach would be to replicate critical shop info to the user document itself or a separate 'shops' collection.
+                console.log('ShopsView: Processing user', doc.id);
 
                 const settingsSnap = await getDocs(collection(db, 'artifacts', appId, 'users', doc.id, 'settings'));
                 let config = { name: 'Unknown Shop', plan: 'Free' };
 
                 settingsSnap.forEach(s => {
-                    if (s.id === 'config') config = s.data();
+                    if (s.id === 'config') {
+                        config = s.data();
+                        console.log('ShopsView: Config for', doc.id, ':', config);
+                    }
                 });
 
                 const shopData = {
                     id: doc.id,
-                    email: doc.data().email || 'No Email', // User email might not be directly on the doc depending on auth flow, usually it is if we sync it.
+                    email: doc.data().email || 'No Email',
                     ...config
                 };
 
@@ -61,17 +64,19 @@ export default function ShopsView({ user }) {
                 if (newStats.planDistribution[config.plan] !== undefined) {
                     newStats.planDistribution[config.plan]++;
                 } else {
-                    // Handle legacy or unknown plans
                     newStats.planDistribution['Free'] = (newStats.planDistribution['Free'] || 0) + 1;
                 }
             }
+
+            console.log('ShopsView: Final shop list:', shopList);
+            console.log('ShopsView: Final stats:', newStats);
 
             setShops(shopList);
             setStats(newStats);
 
         } catch (error) {
-            console.error("Error fetching shops:", error);
-            alert("Failed to load shop data.");
+            console.error("ShopsView: Error fetching shops:", error);
+            alert("Failed to load shop data: " + error.message);
         } finally {
             setLoading(false);
         }
