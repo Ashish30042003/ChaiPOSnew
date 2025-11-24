@@ -1,0 +1,222 @@
+import React, { useState, useEffect } from 'react';
+import {
+    Users, TrendingUp, DollarSign, Activity,
+    Search, Filter, Download, Shield
+} from 'lucide-react';
+import { collection, getDocs } from 'firebase/firestore';
+import { db, appId } from '../firebase/config';
+
+export default function SuperAdminView({ user }) {
+    const [shops, setShops] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [stats, setStats] = useState({
+        totalShops: 0,
+        totalRevenue: 0, // Placeholder for now
+        activeToday: 0,
+        planDistribution: { Free: 0, Basic: 0, Pro: 0, Enterprise: 0 }
+    });
+
+    useEffect(() => {
+        fetchShops();
+    }, []);
+
+    const fetchShops = async () => {
+        try {
+            setLoading(true);
+            // Fetch all users (shops)
+            // Note: In a real production app with thousands of users, you'd want pagination here.
+            const usersRef = collection(db, 'artifacts', appId, 'users');
+            const snapshot = await getDocs(usersRef);
+
+            const shopList = [];
+            const newStats = {
+                totalShops: 0,
+                totalRevenue: 0,
+                activeToday: 0,
+                planDistribution: { Free: 0, Basic: 0, Pro: 0, Enterprise: 0 }
+            };
+
+            for (const doc of snapshot.docs) {
+                // We need to fetch the settings subcollection for each user to get the plan and shop name
+                // This is N+1 queries, which is not ideal for scale but fine for an MVP admin panel.
+                // A better approach would be to replicate critical shop info to the user document itself or a separate 'shops' collection.
+
+                const settingsSnap = await getDocs(collection(db, 'artifacts', appId, 'users', doc.id, 'settings'));
+                let config = { name: 'Unknown Shop', plan: 'Free' };
+
+                settingsSnap.forEach(s => {
+                    if (s.id === 'config') config = s.data();
+                });
+
+                const shopData = {
+                    id: doc.id,
+                    email: doc.data().email || 'No Email', // User email might not be directly on the doc depending on auth flow, usually it is if we sync it.
+                    ...config
+                };
+
+                shopList.push(shopData);
+
+                // Update Stats
+                newStats.totalShops++;
+                if (newStats.planDistribution[config.plan] !== undefined) {
+                    newStats.planDistribution[config.plan]++;
+                } else {
+                    // Handle legacy or unknown plans
+                    newStats.planDistribution['Free'] = (newStats.planDistribution['Free'] || 0) + 1;
+                }
+            }
+
+            setShops(shopList);
+            setStats(newStats);
+
+        } catch (error) {
+            console.error("Error fetching shops:", error);
+            alert("Failed to load shop data.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-full text-stone-500">
+                <div className="flex flex-col items-center gap-4">
+                    <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+                    <p>Loading Platform Data...</p>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="h-full flex flex-col bg-stone-50 overflow-hidden">
+            {/* Header */}
+            <div className="bg-white border-b border-stone-200 p-6 flex justify-between items-center">
+                <div>
+                    <h1 className="text-2xl font-bold text-stone-800 flex items-center gap-2">
+                        <Shield className="text-orange-600" />
+                        Super Admin Dashboard
+                    </h1>
+                    <p className="text-stone-500">Platform Overview & Shop Management</p>
+                </div>
+                <div className="flex gap-3">
+                    <button
+                        onClick={fetchShops}
+                        className="px-4 py-2 bg-stone-100 text-stone-600 rounded-lg hover:bg-stone-200 transition-colors"
+                    >
+                        Refresh Data
+                    </button>
+                </div>
+            </div>
+
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 p-6">
+                <StatCard
+                    icon={<Users className="text-blue-500" />}
+                    label="Total Shops"
+                    value={stats.totalShops}
+                    color="blue"
+                />
+                <StatCard
+                    icon={<Activity className="text-green-500" />}
+                    label="Active Plans"
+                    value={stats.totalShops - stats.planDistribution.Free}
+                    color="green"
+                />
+                <StatCard
+                    icon={<TrendingUp className="text-purple-500" />}
+                    label="Enterprise Users"
+                    value={stats.planDistribution.Enterprise}
+                    color="purple"
+                />
+                <StatCard
+                    icon={<DollarSign className="text-orange-500" />}
+                    label="Free Users"
+                    value={stats.planDistribution.Free}
+                    color="orange"
+                />
+            </div>
+
+            {/* Shop List */}
+            <div className="flex-1 overflow-auto px-6 pb-6">
+                <div className="bg-white rounded-xl border border-stone-200 shadow-sm overflow-hidden">
+                    <div className="p-4 border-b border-stone-200 flex justify-between items-center bg-stone-50">
+                        <h2 className="font-semibold text-stone-700">Registered Shops</h2>
+                        <div className="flex gap-2">
+                            {/* Search placeholder */}
+                            <div className="relative">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" size={16} />
+                                <input
+                                    type="text"
+                                    placeholder="Search shops..."
+                                    className="pl-9 pr-4 py-2 text-sm border border-stone-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <table className="w-full text-left border-collapse">
+                        <thead>
+                            <tr className="bg-stone-50 text-stone-500 text-sm border-b border-stone-200">
+                                <th className="p-4 font-medium">Shop Name</th>
+                                <th className="p-4 font-medium">Owner ID</th>
+                                <th className="p-4 font-medium">Current Plan</th>
+                                <th className="p-4 font-medium">Status</th>
+                                <th className="p-4 font-medium text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-stone-100">
+                            {shops.map((shop) => (
+                                <tr key={shop.id} className="hover:bg-stone-50 transition-colors">
+                                    <td className="p-4">
+                                        <div className="font-medium text-stone-800">{shop.name}</div>
+                                        <div className="text-xs text-stone-400">{shop.id}</div>
+                                    </td>
+                                    <td className="p-4 text-stone-600 font-mono text-xs">
+                                        {shop.id}
+                                    </td>
+                                    <td className="p-4">
+                                        <span className={`px-2 py-1 rounded-full text-xs font-semibold
+                      ${shop.plan === 'Enterprise' ? 'bg-purple-100 text-purple-700' :
+                                                shop.plan === 'Pro' ? 'bg-blue-100 text-blue-700' :
+                                                    shop.plan === 'Basic' ? 'bg-green-100 text-green-700' :
+                                                        'bg-stone-100 text-stone-600'
+                                            }
+                    `}>
+                                            {shop.plan}
+                                        </span>
+                                    </td>
+                                    <td className="p-4">
+                                        <span className="flex items-center gap-1 text-green-600 text-sm">
+                                            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                            Active
+                                        </span>
+                                    </td>
+                                    <td className="p-4 text-right">
+                                        <button className="text-stone-400 hover:text-stone-600">
+                                            View Details
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function StatCard({ icon, label, value, color }) {
+    return (
+        <div className="bg-white p-6 rounded-xl border border-stone-200 shadow-sm flex items-center gap-4">
+            <div className={`p-3 rounded-lg bg-${color}-50`}>
+                {icon}
+            </div>
+            <div>
+                <p className="text-sm text-stone-500">{label}</p>
+                <p className="text-2xl font-bold text-stone-800">{value}</p>
+            </div>
+        </div>
+    );
+}
