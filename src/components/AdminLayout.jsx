@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
     LayoutDashboard, Users, TrendingUp, Settings,
-    LogOut, Shield, Menu, X
+    LogOut, Shield, Menu, X, Ticket
 } from 'lucide-react';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase/config';
@@ -22,6 +22,7 @@ export default function AdminLayout({ children, user }) {
     const navItems = [
         { path: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
         { path: '/admin/shops', icon: Users, label: 'Shops' },
+        { path: '/admin/coupons', icon: Ticket, label: 'Coupons' },
         { path: '/admin/analytics', icon: TrendingUp, label: 'Analytics' },
         { path: '/admin/settings', icon: Settings, label: 'Settings' },
     ];

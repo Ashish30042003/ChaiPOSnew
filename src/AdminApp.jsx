@@ -10,6 +10,7 @@ import ShopsView from './views/admin/ShopsView';
 
 import AnalyticsView from './views/admin/AnalyticsView';
 import SettingsView from './views/admin/SettingsView';
+import CouponsView from './views/admin/CouponsView';
 
 export default function AdminApp() {
     const [user, setUser] = useState(null);
@@ -59,6 +60,7 @@ export default function AdminApp() {
                 <Route path="/shops" element={<ShopsView user={user} />} />
                 <Route path="/analytics" element={<AnalyticsView />} />
                 <Route path="/settings" element={<SettingsView />} />
+                <Route path="/coupons" element={<CouponsView />} />
                 <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
             </Routes>
         </AdminLayout>

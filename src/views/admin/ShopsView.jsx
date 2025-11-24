@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import {
     Users, TrendingUp, DollarSign, Activity,
-    Search, Filter, Download, Shield
+    Search, Filter, Download, Shield, MoreVertical, Ban, Trash2, CheckCircle, Store
 } from 'lucide-react';
-import { collection, getDocs, doc, setDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, setDoc, getDoc } from 'firebase/firestore';
 import { db, appId } from '../../firebase/config';
 
 export default function ShopsView({ user }) {
@@ -15,139 +15,136 @@ export default function ShopsView({ user }) {
         activeToday: 0,
         planDistribution: { Free: 0, Basic: 0, Pro: 0, Enterprise: 0 }
     });
+    const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+    const [selectedShopForUpgrade, setSelectedShopForUpgrade] = useState(null);
+    const [upgradeDetails, setUpgradeDetails] = useState({
+        plan: 'Enterprise',
+        durationDays: 30
+    });
 
     useEffect(() => {
         fetchShops();
     }, []);
 
     const fetchShops = async () => {
+        setLoading(true);
         try {
-            setLoading(true);
-            console.log('ShopsView: Fetching from path:', 'artifacts', appId, 'users');
-
+            console.log("Fetching shops...");
             const usersRef = collection(db, 'artifacts', appId, 'users');
             const snapshot = await getDocs(usersRef);
 
-            console.log('ShopsView: Found', snapshot.size, 'users');
+            const shopsData = await Promise.all(snapshot.docs.map(async (userDoc) => {
+                const userData = userDoc.data();
+                // Fetch settings/config for plan details
+                const settingsRef = doc(db, 'artifacts', appId, 'users', userDoc.id, 'settings', 'config');
+                const settingsSnap = await getDoc(settingsRef);
+                const settings = settingsSnap.exists() ? settingsSnap.data() : {};
 
-            const shopList = [];
+                return {
+                    id: userDoc.id,
+                    email: userData.email,
+                    displayName: userData.displayName,
+                    createdAt: userData.createdAt,
+                    lastActive: userData.lastActive,
+                    plan: settings.plan || 'Free',
+                    planExpiresAt: settings.planExpiresAt,
+                    suspended: settings.suspended || false,
+                    deleted: settings.deleted || false
+                };
+            }));
+
+            // Calculate stats
             const newStats = {
-                totalShops: 0,
+                totalShops: shopsData.length,
                 totalRevenue: 0,
                 activeToday: 0,
                 planDistribution: { Free: 0, Basic: 0, Pro: 0, Enterprise: 0 }
             };
 
-            for (const doc of snapshot.docs) {
-                console.log('ShopsView: Processing user', doc.id);
-
-                const settingsSnap = await getDocs(collection(db, 'artifacts', appId, 'users', doc.id, 'settings'));
-                let config = { name: 'Unknown Shop', plan: 'Free' };
-
-                settingsSnap.forEach(s => {
-                    if (s.id === 'config') {
-                        config = s.data();
-                        console.log('ShopsView: Config for', doc.id, ':', config);
-                    }
-                });
-
-                const shopData = {
-                    id: doc.id,
-                    email: doc.data().email || 'No Email',
-                    ...config
-                };
-
-                shopList.push(shopData);
-
-                // Update Stats
-                newStats.totalShops++;
-                if (newStats.planDistribution[config.plan] !== undefined) {
-                    newStats.planDistribution[config.plan]++;
+            shopsData.forEach(shop => {
+                if (newStats.planDistribution[shop.plan] !== undefined) {
+                    newStats.planDistribution[shop.plan]++;
                 } else {
                     newStats.planDistribution['Free'] = (newStats.planDistribution['Free'] || 0) + 1;
                 }
-            }
+            });
 
-            console.log('ShopsView: Final shop list:', shopList);
-            console.log('ShopsView: Final stats:', newStats);
-
-            setShops(shopList);
+            console.log("Shops fetched:", shopsData);
+            setShops(shopsData.filter(s => !s.deleted));
             setStats(newStats);
-
         } catch (error) {
-            console.error("ShopsView: Error fetching shops:", error);
-            alert("Failed to load shop data: " + error.message);
+            console.error("Error fetching shops:", error);
         } finally {
             setLoading(false);
         }
     };
 
     const handleSuspend = async (shopId, currentStatus) => {
-        if (!confirm(`Are you sure you want to ${currentStatus ? 'activate' : 'suspend'} this shop?`)) return;
-
+        if (!window.confirm(`Are you sure you want to ${currentStatus ? 'unsuspend' : 'suspend'} this shop?`)) return;
         try {
-            const settingsRef = doc(db, 'artifacts', appId, 'users', shopId, 'settings', 'config');
-            await setDoc(settingsRef, { suspended: !currentStatus }, { merge: true });
-            alert(`Shop ${currentStatus ? 'activated' : 'suspended'} successfully`);
+            await setDoc(doc(db, 'artifacts', appId, 'users', shopId, 'settings', 'config'), {
+                suspended: !currentStatus
+            }, { merge: true });
             fetchShops();
         } catch (error) {
-            console.error("Error updating shop status:", error);
-            alert("Failed to update shop status");
+            console.error("Error updating suspension:", error);
+            alert("Failed to update status");
         }
     };
 
     const handleDelete = async (shopId) => {
-        if (!confirm("Are you sure you want to DELETE this shop? This action cannot be undone easily.")) return;
-
+        if (!window.confirm("Are you sure you want to DELETE this shop? This cannot be undone easily.")) return;
         try {
-            const settingsRef = doc(db, 'artifacts', appId, 'users', shopId, 'settings', 'config');
-            await setDoc(settingsRef, { deleted: true }, { merge: true });
-            alert("Shop marked as deleted");
-            fetchShops();
+            await setDoc(doc(db, 'artifacts', appId, 'users', shopId, 'settings', 'config'), {
+                deleted: true
+            }, { merge: true });
+            setShops(shops.filter(s => s.id !== shopId));
         } catch (error) {
             console.error("Error deleting shop:", error);
             alert("Failed to delete shop");
         }
     };
 
-    const handleViewDetails = (shop) => {
-        alert(`Shop Details:\nName: ${shop.name}\nID: ${shop.id}\nEmail: ${shop.email}\nPlan: ${shop.plan}\nPhone: ${shop.phone || 'N/A'}\nAddress: ${shop.address || 'N/A'}`);
+    const openUpgradeModal = (shop) => {
+        setSelectedShopForUpgrade(shop);
+        setUpgradeDetails({ plan: shop.plan === 'Free' ? 'Enterprise' : shop.plan, durationDays: 30 });
+        setShowUpgradeModal(true);
     };
 
-    if (loading) {
-        return (
-            <div className="flex items-center justify-center h-full text-stone-500">
-                <div className="flex flex-col items-center gap-4">
-                    <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
-                    <p>Loading Platform Data...</p>
-                </div>
-            </div>
-        );
-    }
+    const handleManualUpgrade = async (e) => {
+        e.preventDefault();
+        if (!selectedShopForUpgrade) return;
+
+        try {
+            const expiryDate = new Date();
+            expiryDate.setDate(expiryDate.getDate() + parseInt(upgradeDetails.durationDays));
+
+            await setDoc(doc(db, 'artifacts', appId, 'users', selectedShopForUpgrade.id, 'settings', 'config'), {
+                plan: upgradeDetails.plan,
+                planExpiresAt: expiryDate.toISOString(),
+                isTrial: false
+            }, { merge: true });
+
+            alert(`Successfully upgraded ${selectedShopForUpgrade.displayName} to ${upgradeDetails.plan}!`);
+            setShowUpgradeModal(false);
+            fetchShops();
+        } catch (error) {
+            console.error("Error upgrading shop:", error);
+            alert("Failed to upgrade shop.");
+        }
+    };
+
+    if (loading) return <div className="p-8 text-center text-stone-500">Loading shops...</div>;
 
     return (
-        <div className="h-full flex flex-col bg-stone-50 overflow-hidden">
-            {/* Header */}
-            <div className="bg-white border-b border-stone-200 p-6 flex justify-between items-center">
-                <div>
-                    <h1 className="text-2xl font-bold text-stone-800 flex items-center gap-2">
-                        <Shield className="text-orange-600" />
-                        Super Admin Dashboard
-                    </h1>
-                    <p className="text-stone-500">Platform Overview & Shop Management</p>
-                </div>
-                <div className="flex gap-3">
-                    <button
-                        onClick={fetchShops}
-                        className="px-4 py-2 bg-stone-100 text-stone-600 rounded-lg hover:bg-stone-200 transition-colors"
-                    >
-                        Refresh Data
-                    </button>
-                </div>
-            </div>
+        <div className="p-8 bg-stone-50 min-h-full">
+            <h1 className="text-2xl font-bold text-stone-800 mb-6 flex items-center gap-2">
+                <Store className="text-orange-600" />
+                Shop Management
+            </h1>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 p-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                 <StatCard
                     icon={<Users className="text-blue-500" />}
                     label="Total Shops"
@@ -174,92 +171,134 @@ export default function ShopsView({ user }) {
                 />
             </div>
 
-            {/* Shop List */}
-            <div className="flex-1 overflow-auto px-6 pb-6">
-                <div className="bg-white rounded-xl border border-stone-200 shadow-sm overflow-hidden">
-                    <div className="p-4 border-b border-stone-200 flex justify-between items-center bg-stone-50">
-                        <h2 className="font-semibold text-stone-700">Registered Shops</h2>
-                        <div className="flex gap-2">
-                            {/* Search placeholder */}
-                            <div className="relative">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" size={16} />
-                                <input
-                                    type="text"
-                                    placeholder="Search shops..."
-                                    className="pl-9 pr-4 py-2 text-sm border border-stone-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none"
-                                />
-                            </div>
-                        </div>
-                    </div>
-
-                    <table className="w-full text-left border-collapse">
-                        <thead>
-                            <tr className="bg-stone-50 text-stone-500 text-sm border-b border-stone-200">
-                                <th className="p-4 font-medium">Shop Name</th>
-                                <th className="p-4 font-medium">Owner ID</th>
-                                <th className="p-4 font-medium">Current Plan</th>
-                                <th className="p-4 font-medium">Status</th>
-                                <th className="p-4 font-medium text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-stone-100">
-                            {shops.map((shop) => (
-                                <tr key={shop.id} className="hover:bg-stone-50 transition-colors">
-                                    <td className="p-4">
-                                        <div className="font-medium text-stone-800">{shop.name}</div>
-                                        <div className="text-xs text-stone-400">{shop.id}</div>
-                                    </td>
-                                    <td className="p-4 text-stone-600 font-mono text-xs">
-                                        {shop.id}
-                                    </td>
-                                    <td className="p-4">
-                                        <span className={`px-2 py-1 rounded-full text-xs font-semibold
-                      ${shop.plan === 'Enterprise' ? 'bg-purple-100 text-purple-700' :
-                                                shop.plan === 'Pro' ? 'bg-blue-100 text-blue-700' :
-                                                    shop.plan === 'Basic' ? 'bg-green-100 text-green-700' :
-                                                        'bg-stone-100 text-stone-600'
-                                            }
-                    `}>
-                                            {shop.plan}
-                                        </span>
-                                    </td>
-                                    <td className="p-4">
-                                        <span className={`flex items-center gap-1 text-sm ${shop.suspended ? 'text-red-600' : 'text-green-600'}`}>
-                                            <div className={`w-2 h-2 rounded-full ${shop.suspended ? 'bg-red-500' : 'bg-green-500'}`}></div>
-                                            {shop.suspended ? 'Suspended' : 'Active'}
-                                        </span>
-                                    </td>
-                                    <td className="p-4 text-right">
-                                        <div className="flex justify-end gap-2">
-                                            <button
-                                                onClick={() => handleViewDetails(shop)}
-                                                className="text-stone-400 hover:text-stone-600 p-1"
-                                                title="View Details"
-                                            >
-                                                <Search size={16} />
-                                            </button>
-                                            <button
-                                                onClick={() => handleSuspend(shop.id, shop.suspended)}
-                                                className={`${shop.suspended ? 'text-green-400 hover:text-green-600' : 'text-orange-400 hover:text-orange-600'} p-1`}
-                                                title={shop.suspended ? "Activate" : "Suspend"}
-                                            >
-                                                <Activity size={16} />
-                                            </button>
-                                            <button
-                                                onClick={() => handleDelete(shop.id)}
-                                                className="text-red-400 hover:text-red-600 p-1"
-                                                title="Delete"
-                                            >
-                                                <Users size={16} />
-                                            </button>
+            <div className="bg-white rounded-xl shadow-sm border border-stone-200 overflow-hidden">
+                <table className="w-full text-left border-collapse">
+                    <thead>
+                        <tr className="bg-stone-50 border-b border-stone-200 text-xs uppercase text-stone-500 font-bold">
+                            <th className="p-4">Shop Name</th>
+                            <th className="p-4">Owner Email</th>
+                            <th className="p-4">Plan</th>
+                            <th className="p-4">Status</th>
+                            <th className="p-4">Joined</th>
+                            <th className="p-4 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody className="text-sm divide-y divide-stone-100">
+                        {shops.map(shop => (
+                            <tr key={shop.id} className="hover:bg-stone-50 transition-colors">
+                                <td className="p-4 font-medium text-stone-800">{shop.displayName || 'Unknown'}</td>
+                                <td className="p-4 text-stone-600">{shop.email}</td>
+                                <td className="p-4">
+                                    <span className={`px-2 py-1 rounded text-xs font-bold ${shop.plan === 'Enterprise' ? 'bg-purple-100 text-purple-700' :
+                                            shop.plan === 'Pro' ? 'bg-blue-100 text-blue-700' :
+                                                'bg-stone-100 text-stone-600'
+                                        }`}>
+                                        {shop.plan}
+                                    </span>
+                                    {shop.planExpiresAt && (
+                                        <div className="text-[10px] text-stone-400 mt-1">
+                                            Exp: {new Date(shop.planExpiresAt).toLocaleDateString()}
                                         </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                                    )}
+                                </td>
+                                <td className="p-4">
+                                    {shop.suspended ? (
+                                        <span className="text-red-600 font-bold flex items-center gap-1"><Ban size={12} /> Suspended</span>
+                                    ) : (
+                                        <span className="text-green-600 font-bold flex items-center gap-1"><CheckCircle size={12} /> Active</span>
+                                    )}
+                                </td>
+                                <td className="p-4 text-stone-500">{new Date(shop.createdAt).toLocaleDateString()}</td>
+                                <td className="p-4 text-right space-x-2">
+                                    <button
+                                        onClick={() => openUpgradeModal(shop)}
+                                        className="text-blue-600 hover:bg-blue-50 p-1.5 rounded transition-colors"
+                                        title="Upgrade / Manage Plan"
+                                    >
+                                        <MoreVertical size={16} />
+                                    </button>
+                                    <button
+                                        onClick={() => handleSuspend(shop.id, shop.suspended)}
+                                        className={`${shop.suspended ? 'text-green-600 hover:bg-green-50' : 'text-orange-600 hover:bg-orange-50'} p-1.5 rounded transition-colors`}
+                                        title={shop.suspended ? "Unsuspend" : "Suspend"}
+                                    >
+                                        <Ban size={16} />
+                                    </button>
+                                    <button
+                                        onClick={() => handleDelete(shop.id)}
+                                        className="text-red-600 hover:bg-red-50 p-1.5 rounded transition-colors"
+                                        title="Delete Shop"
+                                    >
+                                        <Trash2 size={16} />
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
             </div>
+
+            {/* Upgrade Modal */}
+            {showUpgradeModal && selectedShopForUpgrade && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
+                        <div className="p-6 border-b border-stone-100">
+                            <h2 className="text-xl font-bold text-stone-800">Manage Plan: {selectedShopForUpgrade.displayName}</h2>
+                        </div>
+                        <form onSubmit={handleManualUpgrade} className="p-6 space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-stone-700 mb-1">Select Plan</label>
+                                <select
+                                    className="w-full border border-stone-300 rounded-lg px-3 py-2"
+                                    value={upgradeDetails.plan}
+                                    onChange={e => setUpgradeDetails({ ...upgradeDetails, plan: e.target.value })}
+                                    required
+                                >
+                                    <option value="Free">Free</option>
+                                    <option value="Basic">Basic</option>
+                                    <option value="Pro">Pro</option>
+                                    <option value="Enterprise">Enterprise</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-stone-700 mb-1">Duration (Days)</label>
+                                <input
+                                    type="number"
+                                    className="w-full border border-stone-300 rounded-lg px-3 py-2"
+                                    value={upgradeDetails.durationDays}
+                                    onChange={e => setUpgradeDetails({ ...upgradeDetails, durationDays: e.target.value })}
+                                    required
+                                    min="1"
+                                />
+                                <p className="text-xs text-stone-500 mt-1">
+                                    New Expiry: {(() => {
+                                        const d = new Date();
+                                        d.setDate(d.getDate() + parseInt(upgradeDetails.durationDays || 0));
+                                        return d.toLocaleDateString();
+                                    })()}
+                                </p>
+                            </div>
+
+                            <div className="flex gap-3 mt-6">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowUpgradeModal(false)}
+                                    className="flex-1 px-4 py-2 bg-stone-100 text-stone-600 font-bold rounded-lg hover:bg-stone-200"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="flex-1 px-4 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700"
+                                >
+                                    Update Plan
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
