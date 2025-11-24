@@ -97,15 +97,7 @@ const Header = ({
           <button onClick={() => setActiveTab('analytics')} className={`p-2 rounded-full hover:bg-white/10 ${activeTab === 'analytics' ? 'bg-white/20' : ''}`} title="Analytics"><BarChart3 size={18} /></button>
         )}
 
-        <button onClick={() => setActiveTab('history')} className={`p-2 rounded-full hover:bg-white/10 ${activeTab === 'history' ? 'bg-white/20' : ''}`} title="History"><History size={18} /></button>
-
         <button onClick={() => setActiveTab('settings')} className={`p-2 rounded-full hover:bg-white/10 ${activeTab === 'settings' ? 'bg-white/20' : ''}`} title="Settings"><Settings size={18} /></button>
-
-        <button
-        >
-          <Shield size={18} />
-        </button>
-        )}
 
         <button
           onClick={() => {
