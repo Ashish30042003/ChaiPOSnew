@@ -3,7 +3,7 @@ import {
     Users, TrendingUp, DollarSign, Activity,
     Search, Filter, Download, Shield
 } from 'lucide-react';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, doc, setDoc } from 'firebase/firestore';
 import { db, appId } from '../../firebase/config';
 
 export default function ShopsView({ user }) {
@@ -80,6 +80,38 @@ export default function ShopsView({ user }) {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleSuspend = async (shopId, currentStatus) => {
+        if (!confirm(`Are you sure you want to ${currentStatus ? 'activate' : 'suspend'} this shop?`)) return;
+
+        try {
+            const settingsRef = doc(db, 'artifacts', appId, 'users', shopId, 'settings', 'config');
+            await setDoc(settingsRef, { suspended: !currentStatus }, { merge: true });
+            alert(`Shop ${currentStatus ? 'activated' : 'suspended'} successfully`);
+            fetchShops();
+        } catch (error) {
+            console.error("Error updating shop status:", error);
+            alert("Failed to update shop status");
+        }
+    };
+
+    const handleDelete = async (shopId) => {
+        if (!confirm("Are you sure you want to DELETE this shop? This action cannot be undone easily.")) return;
+
+        try {
+            const settingsRef = doc(db, 'artifacts', appId, 'users', shopId, 'settings', 'config');
+            await setDoc(settingsRef, { deleted: true }, { merge: true });
+            alert("Shop marked as deleted");
+            fetchShops();
+        } catch (error) {
+            console.error("Error deleting shop:", error);
+            alert("Failed to delete shop");
+        }
+    };
+
+    const handleViewDetails = (shop) => {
+        alert(`Shop Details:\nName: ${shop.name}\nID: ${shop.id}\nEmail: ${shop.email}\nPlan: ${shop.plan}\nPhone: ${shop.phone || 'N/A'}\nAddress: ${shop.address || 'N/A'}`);
     };
 
     if (loading) {
@@ -192,15 +224,35 @@ export default function ShopsView({ user }) {
                                         </span>
                                     </td>
                                     <td className="p-4">
-                                        <span className="flex items-center gap-1 text-green-600 text-sm">
-                                            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                                            Active
+                                        <span className={`flex items-center gap-1 text-sm ${shop.suspended ? 'text-red-600' : 'text-green-600'}`}>
+                                            <div className={`w-2 h-2 rounded-full ${shop.suspended ? 'bg-red-500' : 'bg-green-500'}`}></div>
+                                            {shop.suspended ? 'Suspended' : 'Active'}
                                         </span>
                                     </td>
                                     <td className="p-4 text-right">
-                                        <button className="text-stone-400 hover:text-stone-600">
-                                            View Details
-                                        </button>
+                                        <div className="flex justify-end gap-2">
+                                            <button
+                                                onClick={() => handleViewDetails(shop)}
+                                                className="text-stone-400 hover:text-stone-600 p-1"
+                                                title="View Details"
+                                            >
+                                                <Search size={16} />
+                                            </button>
+                                            <button
+                                                onClick={() => handleSuspend(shop.id, shop.suspended)}
+                                                className={`${shop.suspended ? 'text-green-400 hover:text-green-600' : 'text-orange-400 hover:text-orange-600'} p-1`}
+                                                title={shop.suspended ? "Activate" : "Suspend"}
+                                            >
+                                                <Activity size={16} />
+                                            </button>
+                                            <button
+                                                onClick={() => handleDelete(shop.id)}
+                                                className="text-red-400 hover:text-red-600 p-1"
+                                                title="Delete"
+                                            >
+                                                <Users size={16} />
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))}

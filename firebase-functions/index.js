@@ -35,7 +35,7 @@ exports.createRazorpayOrder = functions
         const options = {
             amount: amount * 100, // Convert to paise
             currency: currency,
-            receipt: `rcpt_${new Date().getTime()}`,
+            receipt: `rcpt_${Date.now().toString().slice(-10)}`,
             notes: {
                 firebase_uid: context.auth.uid,
                 plan: plan,
