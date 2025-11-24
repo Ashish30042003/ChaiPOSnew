@@ -50,10 +50,6 @@ const Header = ({
           <h1 className="font-bold text-base leading-tight flex items-center gap-2">
             {storeSettings.name}
             <span className="bg-white/20 text-[10px] px-1.5 py-0.5 rounded font-medium tracking-wider uppercase">{currentPlan}</span>
-              <span className="text-[10px] font-bold text-white bg-red-600 px-2 py-0.5 rounded-full flex items-center gap-1">
-                <Shield size={10} /> Admin
-              </span>
-            )}
           </h1>
           <div className="flex items-center gap-3 text-xs text-white/70 mt-0.5">
             <div className="flex items-center gap-1">
@@ -106,10 +102,10 @@ const Header = ({
 
         <button onClick={() => setActiveTab('settings')} className={`p-2 rounded-full hover:bg-white/10 ${activeTab === 'settings' ? 'bg-white/20' : ''}`} title="Settings"><Settings size={18} /></button>
 
-          <button
-          >
-            <Shield size={18} />
-          </button>
+        <button
+        >
+          <Shield size={18} />
+        </button>
         )}
 
         <button
