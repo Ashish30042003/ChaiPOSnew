@@ -36,7 +36,7 @@ const SettingsModal = ({
       <div className="flex border-b border-stone-200 mb-4 overflow-x-auto">
         <button onClick={() => setSettingsTab('menu')} className={`flex-1 py-2 text-sm font-bold border-b-2 whitespace-nowrap ${settingsTab === 'menu' ? `border-${themeColor}-600 text-${themeColor}-600` : 'border-transparent text-stone-400'}`}>Menu</button>
         <button onClick={() => setSettingsTab('general')} className={`flex-1 py-2 text-sm font-bold border-b-2 whitespace-nowrap ${settingsTab === 'general' ? `border-${themeColor}-600 text-${themeColor}-600` : 'border-transparent text-stone-400'}`}>General</button>
-        {canAccess('receipt_branding') && <button onClick={() => setSettingsTab('receipt')} className={`flex-1 py-2 text-sm font-bold border-b-2 whitespace-nowrap ${settingsTab === 'receipt' ? `border-${themeColor}-600 text-${themeColor}-600` : 'border-transparent text-stone-400'}`}>Receipt</button>}
+        {canAccess('basic_branding') && <button onClick={() => setSettingsTab('branding')} className={`flex-1 py-2 text-sm font-bold border-b-2 whitespace-nowrap ${settingsTab === 'branding' ? `border-${themeColor}-600 text-${themeColor}-600` : 'border-transparent text-stone-400'}`}>Branding</button>}
         <button onClick={() => setSettingsTab('subscription')} className={`flex-1 py-2 text-sm font-bold border-b-2 whitespace-nowrap ${settingsTab === 'subscription' ? `border-${themeColor}-600 text-${themeColor}-600` : 'border-transparent text-stone-400'}`}>Subscription</button>
       </div>
 
@@ -100,66 +100,105 @@ const SettingsModal = ({
         </div>
       )}
 
-      {settingsTab === 'receipt' && canAccess('receipt_branding') && (
+      {settingsTab === 'branding' && canAccess('basic_branding') && (
         <div className="space-y-4">
-          <h3 className="font-bold text-stone-800">Receipt Branding</h3>
+          <h3 className="font-bold text-stone-800">Store Branding</h3>
           <div className="space-y-3">
+            {/* Store Name - Available to ALL users */}
             <div>
-              <label className="block text-xs font-bold text-stone-500 uppercase mb-1">Store Logo</label>
-              <div className="flex flex-col gap-2">
-                {storeSettings.logo && (
-                  <div className="relative w-fit">
-                    <img src={storeSettings.logo} alt="Logo Preview" className="h-16 object-contain border rounded p-1" />
-                    <button
-                      onClick={() => setStoreSettings({ ...storeSettings, logo: '' })}
-                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5 hover:bg-red-600"
-                    >
-                      <Trash2 size={12} />
-                    </button>
-                  </div>
-                )}
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files[0];
-                    if (file) {
-                      if (file.size > 500000) { // 500KB limit
-                        alert("File is too large. Please upload an image under 500KB.");
-                        return;
-                      }
-                      const reader = new FileReader();
-                      reader.onloadend = () => {
-                        setStoreSettings({ ...storeSettings, logo: reader.result });
-                      };
-                      reader.readAsDataURL(file);
-                    }
-                  }}
-                  className="w-full text-sm text-stone-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-stone-100 file:text-stone-700 hover:file:bg-stone-200"
-                />
-              </div>
-              <p className="text-xs text-stone-400 mt-1">Upload an image (max 500KB). It will appear on receipts and as a watermark.</p>
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-stone-500 uppercase mb-1">Address</label>
-              <textarea
-                className="w-full border rounded px-3 py-2 text-sm"
-                rows="2"
-                placeholder="123 Main Street, City"
-                value={storeSettings.address || ''}
-                onChange={e => setStoreSettings({ ...storeSettings, address: e.target.value })}
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-stone-500 uppercase mb-1">Phone Number</label>
+              <label className="block text-xs font-bold text-stone-500 uppercase mb-1">Store Name</label>
               <input
                 className="w-full border rounded px-3 py-2 text-sm"
-                placeholder="+91 98765 43210"
-                value={storeSettings.phone || ''}
-                onChange={e => setStoreSettings({ ...storeSettings, phone: e.target.value })}
+                placeholder="My Tea Shop"
+                value={storeSettings.name || ''}
+                onChange={e => setStoreSettings({ ...storeSettings, name: e.target.value })}
               />
+              <p className="text-xs text-stone-400 mt-1">This appears on receipts and throughout the app.</p>
             </div>
-            <Button themeColor={themeColor} onClick={saveSettings} className="w-full">Save Receipt Settings</Button>
+
+            {/* Advanced Branding - Only for paid users */}
+            {canAccess('receipt_branding') ? (
+              <>
+                <div className="border-t pt-3 mt-3">
+                  <p className="text-xs font-semibold text-stone-600 mb-3">Advanced Branding (Basic+ Plan)</p>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-stone-500 uppercase mb-1">Store Logo</label>
+                  <div className="flex flex-col gap-2">
+                    {storeSettings.logo && (
+                      <div className="relative w-fit">
+                        <img src={storeSettings.logo} alt="Logo Preview" className="h-16 object-contain border rounded p-1" />
+                        <button
+                          onClick={() => setStoreSettings({ ...storeSettings, logo: '' })}
+                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5 hover:bg-red-600"
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      </div>
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          if (file.size > 500000) {
+                            alert("File is too large. Please upload an image under 500KB.");
+                            return;
+                          }
+                          const reader = new FileReader();
+                          reader.onloadend = () => {
+                            setStoreSettings({ ...storeSettings, logo: reader.result });
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                      className="w-full text-sm text-stone-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-stone-100 file:text-stone-700 hover:file:bg-stone-200"
+                    />
+                  </div>
+                  <p className="text-xs text-stone-400 mt-1">Upload an image (max 500KB). It will appear on receipts and as a watermark.</p>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-stone-500 uppercase mb-1">Address</label>
+                  <textarea
+                    className="w-full border rounded px-3 py-2 text-sm"
+                    rows="2"
+                    placeholder="123 Main Street, City"
+                    value={storeSettings.address || ''}
+                    onChange={e => setStoreSettings({ ...storeSettings, address: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-stone-500 uppercase mb-1">Phone Number</label>
+                  <input
+                    className="w-full border rounded px-3 py-2 text-sm"
+                    placeholder="+91 98765 43210"
+                    value={storeSettings.phone || ''}
+                    onChange={e => setStoreSettings({ ...storeSettings, phone: e.target.value })}
+                  />
+                </div>
+              </>
+            ) : (
+              <div className="border-t pt-3 mt-3">
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <p className="text-sm text-blue-800 font-medium mb-2">🎨 Want to add your logo and contact details?</p>
+                  <p className="text-xs text-blue-600 mb-3">Upgrade to Basic plan or higher to customize your receipts with:</p>
+                  <ul className="text-xs text-blue-600 space-y-1 mb-3 ml-4">
+                    <li>• Store logo on receipts</li>
+                    <li>• Address and phone number</li>
+                    <li>• Professional watermark</li>
+                  </ul>
+                  <button
+                    onClick={() => setSettingsTab('subscription')}
+                    className="text-xs bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 font-medium"
+                  >
+                    View Plans
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <Button themeColor={themeColor} onClick={saveSettings} className="w-full">Save Branding Settings</Button>
           </div>
         </div>
       )}
