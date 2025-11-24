@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Palette, Shield, List, Trash2, CheckCircle, Edit2, RotateCcw } from 'lucide-react';
+import { Palette, Shield, List, Trash2, CheckCircle, Edit2, RotateCcw, Gift, Settings } from 'lucide-react';
 import Modal from '../components/Modal';
 import Button from '../components/Button';
 import { COLORS, PLANS, PLAN_ORDER } from '../constants';
@@ -30,6 +30,11 @@ const SettingsModal = ({
   cancelEdit
 }) => {
   const [expandedPlan, setExpandedPlan] = useState(null);
+  const [couponCode, setCouponCode] = useState('');
+
+  const handleUpgrade = (planName) => {
+    upgradePlan(planName, couponCode);
+  };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Settings" color={themeColor}>
@@ -204,64 +209,71 @@ const SettingsModal = ({
       )}
 
       {settingsTab === 'subscription' && (
-        <div className="space-y-4">
-          <div className="text-center mb-4">
-            <div className="text-sm text-stone-500">Current Plan</div>
-            <div className={`text-2xl font-bold text-${PLANS[currentPlan].color}-600`}>{currentPlan}</div>
+        <div className="space-y-6">
+          <div className="flex justify-between items-center">
+            <h3 className="font-bold text-lg">Subscription Plans</h3>
+            <div className="text-right">
+              <div className="text-xs text-stone-500">Current Plan</div>
+              <div className={`font-bold text-${themeColor}-600`}>{currentPlan}</div>
+              {storeSettings.planExpiresAt && (
+                <div className="text-[10px] text-stone-400">
+                  Expires: {new Date(storeSettings.planExpiresAt).toLocaleDateString()}
+                </div>
+              )}
+            </div>
           </div>
-          <div className="space-y-3">
-            {PLAN_ORDER.map(planName => {
-              const plan = PLANS[planName];
-              const isCurrent = currentPlan === planName;
-              const isUpgrade = PLAN_ORDER.indexOf(planName) > PLAN_ORDER.indexOf(currentPlan);
-              const isExpanded = expandedPlan === planName;
 
-              return (
-                <div key={planName} className={`border rounded-xl p-3 ${isCurrent ? `border-${plan.color}-500 bg-${plan.color}-50 ring-1 ring-${plan.color}-500` : 'border-stone-200 bg-white'}`}>
-                  <div className="flex justify-between items-center mb-2">
-                    <div>
-                      <h4 className={`font-bold text-${plan.color}-700`}>{planName}</h4>
-                      <div className="text-xs text-stone-500">{plan.features.length} Features</div>
+          {/* Coupon Input */}
+          <div className="bg-stone-50 p-4 rounded-lg border border-stone-200 flex gap-2 items-center">
+            <Gift size={18} className="text-stone-400" />
+            <input
+              type="text"
+              placeholder="Have a coupon code?"
+              className="bg-transparent outline-none text-sm flex-1 uppercase"
+              value={couponCode}
+              onChange={(e) => setCouponCode(e.target.value)}
+            />
+          </div>
+
+          <div className="grid gap-4">
+            {['Basic', 'Pro', 'Enterprise'].map(planName => (
+              <div key={planName} className={`border rounded-xl p-4 ${currentPlan === planName ? `border-${themeColor}-500 bg-${themeColor}-50` : 'border-stone-200'}`}>
+                <div className="flex justify-between items-start mb-2">
+                  <div>
+                    <h4 className="font-bold">{planName}</h4>
+                    <div className="text-xs text-stone-500">
+                      {planName === 'Basic' && 'For small stalls'}
+                      {planName === 'Pro' && 'For growing shops'}
+                      {planName === 'Enterprise' && 'For chains & franchises'}
                     </div>
-                    <div className="font-bold text-stone-800">₹{plan.price}<span className="text-xs font-normal text-stone-400">/mo</span></div>
                   </div>
-
-                  {isExpanded && (
-                    <div className="mt-2 mb-2 p-2 bg-white/50 rounded-lg">
-                      <div className="text-xs font-bold mb-1">Features:</div>
-                      <ul className="text-xs space-y-1">
-                        {plan.features.map((feature, idx) => (
-                          <li key={idx} className="flex items-center gap-1">
-                            <CheckCircle size={12} className="text-green-600" />
-                            <span>{feature.replace(/_/g, ' ').toUpperCase()}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  <div className="flex justify-between items-center mt-3">
-                    <button
-                      onClick={() => setExpandedPlan(isExpanded ? null : planName)}
-                      className="text-xs text-stone-400 underline hover:text-stone-600"
-                    >
-                      {isExpanded ? 'Hide Details' : 'View Details'}
-                    </button>
-                    {isCurrent ? (
-                      <span className="text-xs font-bold text-green-600 flex items-center gap-1"><CheckCircle size={12} /> Active</span>
-                    ) : (
-                      <button
-                        id={`upgrade-btn-${planName}`}
-                        onClick={() => upgradePlan(planName)}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-bold ${isUpgrade ? `bg-stone-900 text-white hover:bg-stone-700` : 'bg-stone-100 text-stone-400 cursor-not-allowed'}`}
-                      >
-                        {isUpgrade ? 'Upgrade' : 'Downgrade'}
-                      </button>
-                    )}
+                  <div className="text-right">
+                    <div className="font-bold">₹{planName === 'Basic' ? '299' : planName === 'Pro' ? '999' : '2999'}</div>
+                    <div className="text-[10px] text-stone-400">/month</div>
                   </div>
                 </div>
-              );
-            })}
+
+                <ul className="text-xs text-stone-600 space-y-1 mb-4">
+                  {planName === 'Basic' && ['Basic POS', 'Daily Reports'].map(f => <li key={f}>• {f}</li>)}
+                  {planName === 'Pro' && ['Everything in Basic', 'Inventory Tracking', 'Receipt Branding'].map(f => <li key={f}>• {f}</li>)}
+                  {planName === 'Enterprise' && ['Everything in Pro', 'WhatsApp Receipts', 'Loyalty Program', 'KDS'].map(f => <li key={f}>• {f}</li>)}
+                </ul>
+
+                {currentPlan === planName ? (
+                  <button disabled className="w-full bg-stone-200 text-stone-500 py-2 rounded-lg text-sm font-bold cursor-not-allowed">
+                    Current Plan
+                  </button>
+                ) : (
+                  <button
+                    id={`upgrade-btn-${planName}`}
+                    onClick={() => handleUpgrade(planName)}
+                    className={`w-full bg-stone-900 text-white py-2 rounded-lg text-sm font-bold hover:bg-stone-800 transition-colors`}
+                  >
+                    Upgrade
+                  </button>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       )}

@@ -148,6 +148,28 @@ export default function ChaiCornerPOS() {
 
   }, [user]);
 
+  // --- Subscription Check ---
+  useEffect(() => {
+    if (!storeSettings.planExpiresAt) return;
+
+    const checkSubscription = async () => {
+      const expiryDate = new Date(storeSettings.planExpiresAt);
+      const now = new Date();
+
+      // If expired and not already Free
+      if (now > expiryDate && storeSettings.plan !== 'Free') {
+        console.warn("Subscription expired! Downgrading to Free.");
+        await setDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'settings', 'config'), {
+          plan: 'Free',
+          isTrial: false
+        }, { merge: true });
+        alert("Your subscription has expired. You have been downgraded to the Free plan.");
+      }
+    };
+
+    checkSubscription();
+  }, [storeSettings.planExpiresAt, user]);
+
 
   // --- Helpers & Logic ---
 
@@ -216,7 +238,7 @@ export default function ChaiCornerPOS() {
     }
   };
 
-  const upgradePlan = async (newPlan) => {
+  const upgradePlan = async (newPlan, couponCode) => {
     if (!user) return;
 
     try {
@@ -233,7 +255,8 @@ export default function ChaiCornerPOS() {
       const orderResponse = await createOrderFn({
         amount: planDetails.price,
         plan: newPlan,
-        currency: storeSettings.currency === '₹' ? 'INR' : 'USD'
+        currency: storeSettings.currency === '₹' ? 'INR' : 'USD',
+        couponCode: couponCode
       });
 
       const { id: orderId, amount: orderAmount, currency: orderCurrency } = orderResponse.data;
@@ -475,6 +498,20 @@ export default function ChaiCornerPOS() {
 
   return (
     <div className={`h-dvh flex flex-col bg-stone-100 font-sans text-stone-900 theme-${themeColor} overflow-hidden`}>
+      {storeSettings.isTrial && storeSettings.planExpiresAt && (
+        <div className="bg-indigo-600 text-white text-xs font-bold text-center py-1 px-4 flex justify-between items-center">
+          <span>
+            🚀 You are on a 14-Day Enterprise Trial.
+            Expires in {Math.ceil((new Date(storeSettings.planExpiresAt) - new Date()) / (1000 * 60 * 60 * 24))} days.
+          </span>
+          <button
+            onClick={() => setActiveTab('settings')}
+            className="bg-white text-indigo-600 px-2 py-0.5 rounded text-[10px] uppercase tracking-wider hover:bg-indigo-50"
+          >
+            Upgrade Now
+          </button>
+        </div>
+      )}
       <Header
         user={user}
         storeSettings={storeSettings}

@@ -60,7 +60,24 @@ const Auth = ({ themeColor = 'orange' }) => {
             if (isLogin) {
                 await signInWithEmailAndPassword(auth, email, password);
             } else {
-                await createUserWithEmailAndPassword(auth, email, password);
+                const userCred = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCred.user;
+
+                // Initialize with 14-Day Enterprise Trial
+                const trialExpiry = new Date();
+                trialExpiry.setDate(trialExpiry.getDate() + 14);
+
+                const { doc, setDoc } = await import('firebase/firestore');
+                const { db, appId } = await import('../firebase/config');
+
+                await setDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'settings', 'config'), {
+                    plan: 'Enterprise',
+                    isTrial: true,
+                    planExpiresAt: trialExpiry.toISOString(),
+                    name: 'My Chai Shop',
+                    currency: '₹',
+                    theme: 'orange'
+                }, { merge: true });
             }
             navigate('/app');
         } catch (err) {
