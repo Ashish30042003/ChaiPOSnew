@@ -8,6 +8,9 @@ import AdminLayout from './components/AdminLayout';
 import AdminDashboard from './views/admin/AdminDashboard';
 import ShopsView from './views/admin/ShopsView';
 
+import AnalyticsView from './views/admin/AnalyticsView';
+import SettingsView from './views/admin/SettingsView';
+
 export default function AdminApp() {
     const [user, setUser] = useState(null);
     const [authLoading, setAuthLoading] = useState(true);
@@ -54,8 +57,8 @@ export default function AdminApp() {
                 <Route path="/" element={<Navigate to="/admin/dashboard" replace />} />
                 <Route path="/dashboard" element={<AdminDashboard />} />
                 <Route path="/shops" element={<ShopsView user={user} />} />
-                <Route path="/analytics" element={<div className="p-8"><h1 className="text-2xl font-bold">Analytics (Coming Soon)</h1></div>} />
-                <Route path="/settings" element={<div className="p-8"><h1 className="text-2xl font-bold">Settings (Coming Soon)</h1></div>} />
+                <Route path="/analytics" element={<AnalyticsView />} />
+                <Route path="/settings" element={<SettingsView />} />
                 <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
             </Routes>
         </AdminLayout>
