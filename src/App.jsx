@@ -112,6 +112,15 @@ export default function ChaiCornerPOS() {
   useEffect(() => {
     if (!user) return;
 
+    // Create/update user profile document (needed for admin panel to list users)
+    const userProfileRef = doc(db, 'artifacts', appId, 'users', user.uid);
+    setDoc(userProfileRef, {
+      email: user.email,
+      displayName: user.displayName || user.email?.split('@')[0] || 'User',
+      lastActive: new Date().toISOString(),
+      createdAt: new Date().toISOString()
+    }, { merge: true }).catch(err => console.error('Error creating user profile:', err));
+
     const settingsRef = doc(db, 'artifacts', appId, 'users', user.uid, 'settings', 'config');
     onSnapshot(settingsRef, (doc) => {
       if (doc.exists()) setStoreSettings(doc.data());
