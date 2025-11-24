@@ -80,7 +80,7 @@ export default function ChaiCornerPOS() {
   const [editingId, setEditingId] = useState(null); // Track item being edited
 
   // Forms
-  const [newItem, setNewItem] = useState({ name: '', price: '', stock: '' });
+  const [newItem, setNewItem] = useState({ name: '', price: '', stock: '', category: '', variant: '' });
   const [newCustomer, setNewCustomer] = useState({ name: '', phone: '' });
   const [newStaff, setNewStaff] = useState({ name: '', pin: '', role: 'staff' });
 
@@ -370,7 +370,7 @@ export default function ChaiCornerPOS() {
     }).filter(item => item.qty > 0));
   };
 
-  const handleCheckout = async () => {
+  const handleCheckout = async (paymentMethod = 'Cash') => {
     if (cart.length === 0) return;
 
     const orderId = Date.now().toString();
@@ -383,6 +383,7 @@ export default function ChaiCornerPOS() {
       subtotal: cartSubtotal,
       discount: discountAmount,
       total: cartTotal,
+      paymentMethod,
       customerId: selectedCustomer ? selectedCustomer.id : null,
       customerName: selectedCustomer ? selectedCustomer.name : 'Walk-in',
       locationId: currentLocationId,
@@ -407,13 +408,22 @@ export default function ChaiCornerPOS() {
           }
         }
 
-        // Update loyalty
-        if (selectedCustomer && canAccess('loyalty')) {
-          const newPointBalance = (selectedCustomer.points || 0) - redeemPoints + earnedPoints;
-          await updateDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'customers', selectedCustomer.id), {
-            points: newPointBalance,
-            lastVisit: new Date().toISOString()
-          });
+        // Update loyalty & Debt
+        if (selectedCustomer) {
+          const updates = {};
+          if (canAccess('loyalty')) {
+            updates.points = (selectedCustomer.points || 0) - redeemPoints + earnedPoints;
+            updates.lastVisit = new Date().toISOString();
+          }
+
+          // Handle Credit (Debt)
+          if (paymentMethod === 'Credit') {
+            updates.balance = (selectedCustomer.balance || 0) + cartTotal;
+          }
+
+          if (Object.keys(updates).length > 0) {
+            await updateDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'customers', selectedCustomer.id), updates);
+          }
         }
       }
 
@@ -438,9 +448,36 @@ export default function ChaiCornerPOS() {
     if (user) await updateDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'sales', orderId), { status: newStatus });
   };
 
-  const sendWhatsAppReceipt = () => {
+  const sendWhatsAppReceipt = (order = null) => {
     if (!canAccess('whatsapp')) return alert("Upgrade to Enterprise for WhatsApp Integration!");
-    alert(`WhatsApp receipt sent!`);
+
+    const targetOrder = order || (lastOrderId ? salesHistory.find(s => s.id === lastOrderId) : null);
+    if (!targetOrder) return alert("No order to share.");
+
+    let phone = '';
+    if (targetOrder.customerId) {
+      const cust = customers.find(c => c.id === targetOrder.customerId);
+      if (cust && cust.phone) phone = cust.phone;
+    }
+
+    if (!phone) {
+      phone = prompt("Enter customer WhatsApp number (with country code, e.g., 919876543210):");
+      if (!phone) return;
+    }
+
+    // Clean phone
+    phone = phone.replace(/\D/g, '');
+
+    const itemsList = targetOrder.items.map(i => `${i.qty}x ${i.name} - ${storeSettings.currency}${i.price * i.qty}`).join('%0A');
+    const message = `🧾 *Receipt from ${storeSettings.name}*%0A` +
+      `Order %23${targetOrder.id.slice(-4)}%0A` +
+      `----------------%0A` +
+      `${itemsList}%0A` +
+      `----------------%0A` +
+      `*Total: ${storeSettings.currency}${targetOrder.total}*%0A` +
+      `Thank you for visiting!`;
+
+    window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
   };
 
   const saveSettings = async () => {
@@ -463,6 +500,8 @@ export default function ChaiCornerPOS() {
       name: newItem.name,
       price: parseFloat(newItem.price),
       stock: parseInt(newItem.stock) || 0,
+      category: newItem.category || 'General',
+      variant: newItem.variant || '',
       locationId: currentLocationId
     };
 
@@ -472,17 +511,23 @@ export default function ChaiCornerPOS() {
     } else {
       await addDoc(collection(db, 'artifacts', appId, 'users', user.uid, 'menu'), productData);
     }
-    setNewItem({ name: '', price: '', stock: '' });
+    setNewItem({ name: '', price: '', stock: '', category: '', variant: '' });
   };
 
   const startEdit = (item) => {
-    setNewItem({ name: item.name, price: item.price, stock: item.stock });
+    setNewItem({
+      name: item.name,
+      price: item.price,
+      stock: item.stock,
+      category: item.category || '',
+      variant: item.variant || ''
+    });
     setEditingId(item.id);
   };
 
   const cancelEdit = () => {
     setEditingId(null);
-    setNewItem({ name: '', price: '', stock: '' });
+    setNewItem({ name: '', price: '', stock: '', category: '', variant: '' });
   };
 
   const themeColor = storeSettings.theme;

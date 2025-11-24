@@ -48,23 +48,32 @@ const SettingsModal = ({
       {settingsTab === 'menu' && (
         <div className="space-y-4">
           <h3 className="font-bold text-stone-800 flex items-center gap-2"><List size={18} /> Inventory Management</h3>
-          <form onSubmit={handleSaveItem} className="grid grid-cols-4 gap-2 mb-2 p-3 bg-stone-50 rounded-lg border">
-            <input className="col-span-2 border rounded px-2 py-1 text-sm" placeholder="Item Name" value={newItem.name} onChange={e => setNewItem({ ...newItem, name: e.target.value })} />
-            <input className="border rounded px-2 py-1 text-sm" type="number" placeholder="Price" value={newItem.price} onChange={e => setNewItem({ ...newItem, price: e.target.value })} />
-            <input className="border rounded px-2 py-1 text-sm" type="number" placeholder="Stock" value={newItem.stock} onChange={e => setNewItem({ ...newItem, stock: e.target.value })} />
+          <form onSubmit={handleSaveItem} className="grid grid-cols-6 gap-2 mb-2 p-3 bg-stone-50 rounded-lg border">
+            <input className="col-span-2 border rounded px-2 py-1 text-sm" placeholder="Item Name" value={newItem.name} onChange={e => setNewItem({ ...newItem, name: e.target.value })} required />
+            <input className="col-span-1 border rounded px-2 py-1 text-sm" placeholder="Category (e.g. Tea)" value={newItem.category} onChange={e => setNewItem({ ...newItem, category: e.target.value })} list="categories" />
+            <datalist id="categories">
+              {[...new Set(locationMenu.map(i => i.category))].filter(Boolean).map(c => <option key={c} value={c} />)}
+            </datalist>
+            <input className="col-span-1 border rounded px-2 py-1 text-sm" placeholder="Variant (e.g. Small)" value={newItem.variant} onChange={e => setNewItem({ ...newItem, variant: e.target.value })} />
+            <input className="col-span-1 border rounded px-2 py-1 text-sm" type="number" placeholder="Price" value={newItem.price} onChange={e => setNewItem({ ...newItem, price: e.target.value })} required />
+            <input className="col-span-1 border rounded px-2 py-1 text-sm" type="number" placeholder="Stock" value={newItem.stock} onChange={e => setNewItem({ ...newItem, stock: e.target.value })} required />
+
             {editingId ? (
-              <div className="col-span-4 flex gap-2">
+              <div className="col-span-6 flex gap-2 mt-2">
                 <Button themeColor={themeColor} className="flex-1 py-1 text-sm">Update Item</Button>
                 <button type="button" onClick={cancelEdit} className="px-3 py-1 text-sm bg-stone-200 hover:bg-stone-300 rounded font-medium text-stone-600 flex items-center gap-1"><RotateCcw size={14} /> Cancel</button>
               </div>
             ) : (
-              <Button themeColor={themeColor} className="col-span-4 py-1 text-sm">Add to Menu</Button>
+              <Button themeColor={themeColor} className="col-span-6 py-1 text-sm mt-2">Add to Menu</Button>
             )}
           </form>
           <div className="max-h-60 overflow-y-auto border rounded">
             {locationMenu.map(item => (
               <div key={item.id} className={`flex justify-between p-2 border-b text-sm items-center ${editingId === item.id ? 'bg-orange-50 border-l-4 border-orange-500' : 'hover:bg-stone-50'}`}>
-                <span>{item.name}</span>
+                <div className="flex flex-col">
+                  <span className="font-medium">{item.name} {item.variant && <span className="text-xs text-stone-500 bg-stone-100 px-1 rounded">({item.variant})</span>}</span>
+                  <span className="text-[10px] text-stone-400">{item.category || 'General'}</span>
+                </div>
                 <div className="flex items-center gap-3">
                   <span className="font-mono font-bold text-stone-500">{item.stock}</span>
                   <span className="font-mono text-xs">₹{item.price}</span>
